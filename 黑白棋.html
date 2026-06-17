@@ -13,7 +13,8 @@
     color: #5a4a6a; min-height: 100vh; padding: 14px;
   }
   body { overflow-x: hidden; }
-  .wrap { width: 100%; max-width: 1120px; margin: 0 auto; }
+  .page { display: flex; justify-content: center; align-items: flex-start; gap: 22px; }
+  .wrap { flex: 0 1 1120px; min-width: 0; }
 
   .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 14px; }
   h1 { text-align: center; font-size: 28px; margin: 0; letter-spacing: 4px;
@@ -75,14 +76,18 @@
     box-shadow:0 5px 0 #e34d86; cursor:pointer; transition:transform .08s,box-shadow .08s; }
   button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
 
-  .ad-side {
-    position: fixed; top: 50%; transform: translateY(-50%); width: 160px; height: 600px;
+  .about { margin:24px 0 0; background:#fff; border:3px solid #ffe1ee; border-radius:18px;
+    padding:18px 22px; color:#7a6a8a; line-height:1.8; font-size:14.5px; }
+  .about h2 { margin:0 0 8px; font-size:18px; color:#ff6fa5; }
+  .about p { margin:0 0 8px; } .about b { color:#ff6fa5; }
+
+  .ad-rail {
+    flex: 0 0 160px; height: 600px; position: sticky; top: 14px;
     background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
     border: 2px dashed #ffc2da; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; z-index: 5;
+    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px;
   }
-  .ad-side.left { right: calc(50% + 575px); } .ad-side.right { left: calc(50% + 575px); }
-  @media (max-width: 1520px) { .ad-side { display: none; } }
+  @media (max-width: 1520px) { .ad-rail { display: none; } }
 
   .overlay { position:fixed; inset:0; background:rgba(90,60,90,.45); display:none; align-items:center; justify-content:center; z-index:10; }
   .overlay.show { display:flex; }
@@ -95,6 +100,8 @@
 </style>
 </head>
 <body>
+<div class="page">
+<aside class="ad-rail left">📢 Ad<br>(left)</aside>
 <div class="wrap">
   <div class="topbar">
     <h1 id="h1">🎀 Cute Reversi 🎀</h1>
@@ -116,10 +123,10 @@
       <div class="actions"><button class="act" id="restartBtn" onclick="restart()"></button></div>
     </div>
   </div>
+  <div class="about"><h2 id="aboutTitle"></h2><div id="aboutBody"></div></div>
 </div>
-
-<div class="ad-side left">📢 Ad<br>(left)</div>
-<div class="ad-side right">📢 Ad<br>(right)</div>
+<aside class="ad-rail right">📢 Ad<br>(right)</aside>
+</div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -138,6 +145,8 @@ const STR = {
     winTitle:'🏆 {tok} {name} wins!', winText:'Score {hi} : {lo} — congrats!',
     drawTitle:'🤝 Draw', drawText:'{n} each — evenly matched!',
     names:['Rabbit','Cat'],
+    aboutTitle:'About Cute Reversi',
+    aboutBody:'<p><b>Cute Reversi</b> (also known as Othello) is a two-player strategy game of traps and dramatic comebacks, played on an 8×8 board.</p><p>Place a stone to <b>trap</b> your opponent\'s stones between two of yours, and they flip to your color. When the board is full, whoever has more stones wins. The lead can swing right up to the final move — every game is full of surprises. Play with a friend on one screen — phone, tablet or computer — free, no download.</p>',
     tip:'🎯 <b>How to play</b>: place a stone so it <b>traps</b> the opponent\'s stones (row, column, or diagonal); trapped stones <b>flip to your color</b>.<br>Blinking dots show your moves.<br>No move = auto skip.<br>When the board is full, <b>more stones wins</b>! 🏆<br><br>The winner of a round goes first next round.' },
   zh: { title:'🎀 萌萌黑白棋 🎀', titlePlain:'萌萌黑白棋',
     turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束',
@@ -146,6 +155,8 @@ const STR = {
     winTitle:'🏆 {tok} {name} 获胜！', winText:'比分 {hi} : {lo}，恭喜～',
     drawTitle:'🤝 平局', drawText:'双方各 {n} 子，势均力敌～',
     names:['兔兔','猫猫'],
+    aboutTitle:'关于萌萌黑白棋',
+    aboutBody:'<p><b>黑白棋</b>（又叫奥赛罗 Othello）是经典的双人策略棋，在 8×8 棋盘上对弈，以"大逆转"著称。</p><p>把棋子下在能<b>夹住</b>对方棋子的位置，被夹住的就翻成你的颜色。棋盘填满后，棋子多的人获胜。局势常常到最后一步还能翻盘，每局都有惊喜。和朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
     tip:'🎯 <b>玩法</b>：把棋子下在能<b>夹住</b>对方棋子的位置<br>（横、竖、斜都行），被夹住的就<b>翻成你的颜色</b>。<br>闪烁的小点是你能下的地方。<br>没处可下就自动跳过。<br>棋盘满了，<b>棋子多的人赢</b>！🏆<br><br>上一局赢的人，下一局先手～' },
   es: { title:'🎀 Reversi Lindo 🎀', titlePlain:'Reversi Lindo',
     turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego',
@@ -154,6 +165,8 @@ const STR = {
     winTitle:'🏆 ¡{tok} {name} gana!', winText:'Marcador {hi} : {lo} — ¡felicidades!',
     drawTitle:'🤝 Empate', drawText:'{n} cada uno — ¡muy parejos!',
     names:['Conejo','Gato'],
+    aboutTitle:'Sobre Reversi Lindo',
+    aboutBody:'<p><b>Reversi</b> (también llamado Othello) es un juego de estrategia para dos, famoso por sus remontadas, en un tablero de 8×8.</p><p>Coloca una ficha para <b>atrapar</b> las fichas del rival entre las tuyas y cámbialas a tu color. Cuando el tablero se llena, gana quien tenga más fichas. ¡La ventaja puede cambiar hasta la última jugada! Juega con un amigo en la misma pantalla — móvil, tablet u ordenador — gratis y sin descargas.</p>',
     tip:'🎯 <b>Cómo jugar</b>: coloca una ficha que <b>atrape</b> las del rival (fila, columna o diagonal); las atrapadas <b>cambian a tu color</b>.<br>Los puntos parpadeantes son tus jugadas.<br>Sin jugada = salto automático.<br>Cuando el tablero se llena, <b>gana quien tenga más fichas</b>. 🏆<br><br>El ganador de una ronda empieza la siguiente.' }
 };
 let lang = localStorage.getItem('mz_lang') || 'en';
@@ -239,6 +252,7 @@ function applyLang() {
   localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
   document.title = STR[lang].titlePlain;
   $('h1').textContent = L('title'); $('tip').innerHTML = L('tip');
+  $('aboutTitle').textContent = L('aboutTitle'); $('aboutBody').innerHTML = L('aboutBody');
   $('restartBtn').textContent = L('restartBtn'); $('againBtn').textContent = L('againBtn');
   document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
   render();

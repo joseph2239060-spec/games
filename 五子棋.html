@@ -13,7 +13,8 @@
     color: #5a4a6a; min-height: 100vh; padding: 14px;
   }
   body { overflow-x: hidden; }
-  .wrap { width: 100%; max-width: 1120px; margin: 0 auto; }
+  .page { display: flex; justify-content: center; align-items: flex-start; gap: 22px; }
+  .wrap { flex: 0 1 1120px; min-width: 0; }
 
   .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 14px; }
   h1 {
@@ -85,14 +86,18 @@
   button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
   button.act.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
 
-  .ad-side {
-    position: fixed; top: 50%; transform: translateY(-50%); width: 160px; height: 600px;
+  .about { margin:24px 0 0; background:#fff; border:3px solid #ffe1ee; border-radius:18px;
+    padding:18px 22px; color:#7a6a8a; line-height:1.8; font-size:14.5px; }
+  .about h2 { margin:0 0 8px; font-size:18px; color:#ff6fa5; }
+  .about p { margin:0 0 8px; } .about b { color:#ff6fa5; }
+
+  .ad-rail {
+    flex: 0 0 160px; height: 600px; position: sticky; top: 14px;
     background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
     border: 2px dashed #ffc2da; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; z-index: 5;
+    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px;
   }
-  .ad-side.left { right: calc(50% + 575px); } .ad-side.right { left: calc(50% + 575px); }
-  @media (max-width: 1520px) { .ad-side { display: none; } }
+  @media (max-width: 1520px) { .ad-rail { display: none; } }
 
   .overlay { position:fixed; inset:0; background:rgba(90,60,90,.45); display:none; align-items:center; justify-content:center; z-index:10; }
   .overlay.show { display:flex; }
@@ -105,6 +110,8 @@
 </style>
 </head>
 <body>
+<div class="page">
+<aside class="ad-rail left">📢 Ad<br>(left)</aside>
 <div class="wrap">
   <div class="topbar">
     <h1 id="h1">🎀 Cute Gomoku 🎀</h1>
@@ -133,10 +140,10 @@
       </div>
     </div>
   </div>
+  <div class="about"><h2 id="aboutTitle"></h2><div id="aboutBody"></div></div>
 </div>
-
-<div class="ad-side left">📢 Ad<br>(left)</div>
-<div class="ad-side right">📢 Ad<br>(right)</div>
+<aside class="ad-rail right">📢 Ad<br>(right)</aside>
+</div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -155,6 +162,8 @@ const STR = {
     winTitle:'🏆 {tok} {name} wins!', winText:'Five in a row — awesome!',
     drawTitle:'🤝 Draw', drawText:'The board is full — nobody wins.',
     names:['Rabbit','Cat'],
+    aboutTitle:'About Cute Gomoku',
+    aboutBody:'<p><b>Cute Gomoku</b> (also called Five in a Row) is a classic two-player strategy game played on a 15×15 board.</p><p>Players take turns placing one stone each. The first to line up <b>five of their own stones</b> in a row — horizontally, vertically, or diagonally — wins. Easy to learn, full of tactics. Play with a friend on one screen — phone, tablet or computer — free and no download.</p>',
     tip:'🎯 <b>How to play</b>: take turns placing a stone.<br>First to line up <b>5 of your own stones</b><br>(row, column, or diagonal) wins!<br><br>🏆 The winner of a round goes first next round.<br>(Rabbit 🐰 starts the first game.)' },
   zh: { title:'🎀 萌萌五子棋 🎀', titlePlain:'萌萌五子棋',
     turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束', cnt:'已落子 {n}',
@@ -162,6 +171,8 @@ const STR = {
     winTitle:'🏆 {tok} {name} 获胜！', winText:'五子连珠，太厉害啦～',
     drawTitle:'🤝 平局', drawText:'棋盘满了，不分胜负～',
     names:['兔兔','猫猫'],
+    aboutTitle:'关于萌萌五子棋',
+    aboutBody:'<p><b>五子棋</b>是经典的双人策略棋，在 15×15 的棋盘上对弈。</p><p>两人轮流落子，谁先把<b>五颗自己的棋子连成一条线</b>（横、竖或斜）就获胜。规则简单，却很考策略。和朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
     tip:'🎯 <b>玩法</b>：两人轮流在棋盘上放棋子，<br>谁先把 <b>5 颗自己的棋子连成一条线</b><br>（横、竖、或斜），谁就赢啦！<br><br>🏆 上一局赢的人，下一局先手！<br>（第一局 🐰 兔兔先手）' },
   es: { title:'🎀 Gomoku Lindo 🎀', titlePlain:'Gomoku Lindo',
     turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego', cnt:'Fichas: {n}',
@@ -169,6 +180,8 @@ const STR = {
     winTitle:'🏆 ¡{tok} {name} gana!', winText:'¡Cinco en línea — genial!',
     drawTitle:'🤝 Empate', drawText:'El tablero está lleno — nadie gana.',
     names:['Conejo','Gato'],
+    aboutTitle:'Sobre Gomoku Lindo',
+    aboutBody:'<p><b>Gomoku</b> (cinco en línea) es un clásico juego de estrategia para dos jugadores en un tablero de 15×15.</p><p>Por turnos cada jugador coloca una ficha. El primero en alinear <b>cinco fichas propias</b> (en fila, columna o diagonal) gana. Fácil de aprender y lleno de táctica. Juega con un amigo en la misma pantalla — móvil, tablet u ordenador — gratis y sin descargas.</p>',
     tip:'🎯 <b>Cómo jugar</b>: por turnos coloca una ficha.<br>El primero en alinear <b>5 fichas propias</b><br>(fila, columna o diagonal) ¡gana!<br><br>🏆 El ganador de una ronda empieza la siguiente.<br>(Conejo 🐰 empieza la primera partida.)' }
 };
 let lang = localStorage.getItem('mz_lang') || 'en';
@@ -255,6 +268,7 @@ function applyLang() {
   localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
   document.title = STR[lang].titlePlain;
   $('h1').textContent = L('title'); $('tip').innerHTML = L('tip');
+  $('aboutTitle').textContent = L('aboutTitle'); $('aboutBody').innerHTML = L('aboutBody');
   $('undoBtn').textContent = L('undoBtn'); $('restartBtn').textContent = L('restartBtn'); $('againBtn').textContent = L('againBtn');
   document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
   updatePanel();

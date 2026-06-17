@@ -13,7 +13,8 @@
     color: #5a4a6a; min-height: 100vh; padding: 22px 14px 40px;
   }
   body { overflow-x: hidden; }
-  .wrap { width: 100%; max-width: 960px; margin: 0 auto; }
+  .page { display: flex; justify-content: center; align-items: flex-start; gap: 22px; }
+  .wrap { flex: 0 1 960px; min-width: 0; }
   .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:4px; }
   h1 { text-align: center; font-size: 34px; margin: 6px 0 4px; letter-spacing: 3px;
     color: #ff6fa5; font-weight: 900;
@@ -39,15 +40,16 @@
   .card.g2 { border-color:#cfe9ff; box-shadow:0 6px 0 #b9def7, 0 10px 24px rgba(120,180,240,.2); }
   .foot { text-align:center; margin-top:30px; font-size:13px; color:#bbaecb; }
 
-  .ad-side { position: fixed; top: 50%; transform: translateY(-50%); width: 160px; height: 600px;
+  .ad-rail { flex: 0 0 160px; height: 600px; position: sticky; top: 22px;
     background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
     border: 2px dashed #ffc2da; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; z-index: 5; }
-  .ad-side.left { right: calc(50% + 495px); } .ad-side.right { left: calc(50% + 495px); }
-  @media (max-width: 1320px) { .ad-side { display: none; } }
+    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; }
+  @media (max-width: 1360px) { .ad-rail { display: none; } }
 </style>
 </head>
 <body>
+  <div class="page">
+  <aside class="ad-rail left">📢 Ad<br>(left)</aside>
   <div class="wrap">
     <div class="topbar">
       <h1 id="h1">🎀 Cute Mini Games 🎀</h1>
@@ -76,9 +78,8 @@
 
     <div class="foot" id="foot"></div>
   </div>
-
-  <div class="ad-side left">📢 Ad<br>(left)</div>
-  <div class="ad-side right">📢 Ad<br>(right)</div>
+  <aside class="ad-rail right">📢 Ad<br>(right)</aside>
+  </div>
 
 <script>
 "use strict";

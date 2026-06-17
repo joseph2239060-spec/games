@@ -10,11 +10,11 @@
     margin: 0;
     font-family: "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
     background: linear-gradient(165deg, #fff1f6 0%, #e9f7ff 55%, #f3f0ff 100%);
-    color: #5a4a6a; min-height: 100vh;
-    display: flex; justify-content: center; padding: 10px;
+    color: #5a4a6a; min-height: 100vh; padding: 10px;
   }
   body { overflow-x: hidden; }
-  .wrap { width: 100%; max-width: 1120px; }
+  .page { display: flex; justify-content: center; align-items: flex-start; gap: 22px; }
+  .wrap { flex: 0 1 1120px; min-width: 0; }
 
   .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 10px; }
   h1 {
@@ -115,17 +115,20 @@
   button.act.green { background:linear-gradient(180deg,#9be7a3,#5fd070); box-shadow:0 5px 0 #3fae52; }
   button.act.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
 
+  .about { margin:24px 0 0; background:#fff; border:3px solid #ffe1ee; border-radius:18px;
+    padding:18px 22px; color:#7a6a8a; line-height:1.8; font-size:14.5px; }
+  .about h2 { margin:0 0 8px; font-size:18px; color:#ff6fa5; }
+  .about p { margin:0 0 8px; } .about b { color:#ff6fa5; }
+
   /* 左右两边的竖条广告位 */
-  .ad-side {
-    position: fixed; top: 50%; transform: translateY(-50%); width: 160px; height: 600px;
+  .ad-rail {
+    flex: 0 0 160px; height: 600px; position: sticky; top: 10px;
     background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
     border: 2px dashed #ffc2da; border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; z-index: 5;
+    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px;
   }
-  .ad-side.left { right: calc(50% + 575px); }
-  .ad-side.right { left: calc(50% + 575px); }
-  @media (max-width: 1520px) { .ad-side { display: none; } }
+  @media (max-width: 1520px) { .ad-rail { display: none; } }
 
   .overlay { position:fixed; inset:0; background:rgba(90,60,90,.45); backdrop-filter:blur(3px);
     display:none; align-items:center; justify-content:center; z-index:10; }
@@ -144,6 +147,8 @@
 </style>
 </head>
 <body>
+<div class="page">
+<aside class="ad-rail left">📢 Ad<br>(left)</aside>
 <div class="wrap">
   <div class="topbar">
     <h1 id="h1">🎀 Cute Monopoly 🎀</h1>
@@ -161,10 +166,10 @@
       <div class="actions" id="actions"></div>
     </div>
   </div>
+  <div class="about"><h2 id="aboutTitle"></h2><div id="aboutBody"></div></div>
 </div>
-
-<div class="ad-side left">📢 Ad<br>(left)</div>
-<div class="ad-side right">📢 Ad<br>(right)</div>
+<aside class="ad-rail right">📢 Ad<br>(right)</aside>
+</div>
 
 <!-- 选人数 -->
 <div class="overlay" id="setup">
@@ -219,7 +224,9 @@ const STR = {
       cotton:'Candy',lolly:'Lolly',pudding:'Pudding',jelly:'Jelly',strawberry:'Berry',blueberry:'B.Berry',
       peach:'Peach',watermelon:'Melon',pineapple:'Pineapple',donut:'Donut',macaron:'Macaron',chocolate:'Choco',
       caramel:'Caramel',pastry:'Pastry',matcha:'Matcha',mango:'Mango',rainbow:'Rainbow',starry:'Starry',cloud:'Cloud'},
-    names:['Rabbit','Cat','Dog','Frog']
+    names:['Rabbit','Cat','Dog','Frog'],
+    aboutTitle:'About Cute Monopoly',
+    aboutBody:'<p><b>Cute Monopoly</b> is a candy-themed board game for <b>2 to 4 players</b> on one device.</p><p>Roll the dice and move around the board. Buy lands, build houses and hotels to raise the toll, and charge rivals when they land on your property. Pass Start to collect ¥200. When a player can\'t pay, they go bankrupt — the <b>last player standing wins</b>! Great for family game night — play together on phone, tablet or computer, free and no download.</p>'
   },
   zh: {
     title:'🎀 萌萌大富翁 🎀', titlePlain:'萌萌大富翁',
@@ -247,7 +254,9 @@ const STR = {
       cotton:'棉花糖',lolly:'棒棒糖',pudding:'布丁屋',jelly:'果冻屋',strawberry:'草莓园',blueberry:'蓝莓园',
       peach:'蜜桃湾',watermelon:'西瓜湾',pineapple:'菠萝湾',donut:'甜甜圈',macaron:'马卡龙',chocolate:'巧克力',
       caramel:'焦糖城',pastry:'千层酥',matcha:'抹茶谷',mango:'芒果谷',rainbow:'彩虹堡',starry:'星空堡',cloud:'云朵顶'},
-    names:['兔兔','猫猫','狗狗','蛙蛙']
+    names:['兔兔','猫猫','狗狗','蛙蛙'],
+    aboutTitle:'关于萌萌大富翁',
+    aboutBody:'<p><b>萌萌大富翁</b>是糖果主题的桌游，支持 <b>2～4 人</b>在同一台设备上玩。</p><p>掷骰子绕棋盘走，买地、盖房盖旅馆来提高过路费，对手踩到你的地就要付钱。每次经过起点领 ¥200。谁付不起钱就破产，<b>最后剩下的人获胜</b>！适合全家一起玩，手机、平板、电脑都行，免费、免下载。</p>'
   },
   es: {
     title:'🎀 Monopoly Lindo 🎀', titlePlain:'Monopoly Lindo',
@@ -275,7 +284,9 @@ const STR = {
       cotton:'Dulce',lolly:'Pirulí',pudding:'Pudín',jelly:'Gelatina',strawberry:'Fresa',blueberry:'Arándano',
       peach:'Durazno',watermelon:'Sandía',pineapple:'Piña',donut:'Dona',macaron:'Macarrón',chocolate:'Choco',
       caramel:'Caramelo',pastry:'Hojaldre',matcha:'Matcha',mango:'Mango',rainbow:'Arcoíris',starry:'Estrella',cloud:'Nube'},
-    names:['Conejo','Gato','Perro','Rana']
+    names:['Conejo','Gato','Perro','Rana'],
+    aboutTitle:'Sobre Monopoly Lindo',
+    aboutBody:'<p><b>Monopoly Lindo</b> es un juego de mesa con tema de dulces para <b>2 a 4 jugadores</b> en un mismo dispositivo.</p><p>Tira los dados y avanza por el tablero. Compra terrenos, construye casas y hoteles para subir el peaje, y cobra a tus rivales cuando caen en tu propiedad. Pasa por la Salida y cobra ¥200. Quien no puede pagar quiebra — ¡el <b>último en pie gana</b>! Ideal para jugar en familia en móvil, tablet u ordenador, gratis y sin descargas.</p>'
   }
 };
 let lang = localStorage.getItem('mz_lang') || 'en';
@@ -565,6 +576,7 @@ function applyLang() {
   document.documentElement.lang = lang;
   document.title = STR[lang].titlePlain;
   $('h1').textContent = L('title');
+  $('aboutTitle').textContent = L('aboutTitle'); $('aboutBody').innerHTML = L('aboutBody');
   $('setupTitle').textContent = L('setupTitle');
   $('setupSub').textContent = L('setupSub');
   $('againBtn').textContent = L('againBtn');

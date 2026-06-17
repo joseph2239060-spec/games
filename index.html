@@ -3,108 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cute Mini Games · 2 Players</title>
-<meta name="description" id="metaDesc" content="Cute two-player mini-games: Monopoly, Gomoku, Reversi. One device, two players, free, no download.">
+<title>Mini Games — Free Online Games</title>
+<meta name="description" id="metaDesc" content="Free online mini-games to play with a friend in your browser. No download. Cute two-player board games: Monopoly, Gomoku, Reversi.">
 <style>
+  :root{
+    --ink:#1d2533; --muted:#6b7480; --line:#e6e9ef; --card:#ffffff;
+    --accent:#4f6cf7; --accent-dark:#3a52d6; --accent-soft:#eef1fe;
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0; font-family: "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
-    background: linear-gradient(165deg, #fff1f6 0%, #e9f7ff 55%, #f3f0ff 100%);
-    color: #5a4a6a; min-height: 100vh; padding: 22px 14px 40px;
+    margin: 0; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
+    background: linear-gradient(180deg, #f7f8fb 0%, #eef1f6 100%);
+    color: var(--ink); min-height: 100vh; padding: 18px 16px 48px; overflow-x: hidden;
   }
-  body { overflow-x: hidden; }
-  .page { display: flex; justify-content: center; align-items: flex-start; gap: 22px; }
-  .wrap { flex: 0 1 960px; min-width: 0; }
-  .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:4px; }
-  h1 { text-align: center; font-size: 34px; margin: 6px 0 4px; letter-spacing: 3px;
-    color: #ff6fa5; font-weight: 900;
-    text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(255,111,165,.25); transform: rotate(-1.5deg); }
-  .langbar { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:4px; }
-  .langbar button { border:2px solid #ffd0e3; background:#fff; color:#ff6fa5; font-weight:800; font-size:12px;
-    padding:5px 9px; border-radius:11px; cursor:pointer; font-family:inherit; }
-  .langbar button.on { background:#ff6fa5; color:#fff; border-color:#ff6fa5; }
-  .sub { text-align: center; font-size: 16px; color: #b79; margin-bottom: 26px; font-weight: 700; }
+  a { text-decoration: none; color: inherit; }
 
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-  .card { background: #fff; border-radius: 22px; border: 4px solid #ffe0ec; padding: 24px 20px;
-    text-align: center; text-decoration: none; color: inherit;
-    box-shadow: 0 6px 0 #ffd0e3, 0 10px 24px rgba(255,150,190,.2); transition: transform .15s, box-shadow .15s; }
-  .card:hover { transform: translateY(-5px); box-shadow: 0 11px 0 #ffd0e3, 0 16px 30px rgba(255,150,190,.3); }
-  .card .icon { font-size: 60px; line-height: 1; margin-bottom: 10px; }
-  .card .name { font-size: 22px; font-weight: 900; color: #ff5f9e; margin-bottom: 8px; }
-  .card .desc { font-size: 14px; color: #9a8aaa; line-height: 1.6; min-height: 60px; }
-  .card .play { display: inline-block; margin-top: 14px; padding: 11px 26px; border-radius: 16px;
-    font-size: 16px; font-weight: 900; color: #fff;
-    background: linear-gradient(180deg,#ff9ec6,#ff6fa5); box-shadow: 0 4px 0 #e34d86; }
-  .card.g1 { border-color:#ffe1b0; box-shadow:0 6px 0 #ffd79e, 0 10px 24px rgba(255,190,120,.2); }
-  .card.g2 { border-color:#cfe9ff; box-shadow:0 6px 0 #b9def7, 0 10px 24px rgba(120,180,240,.2); }
-  .foot { text-align:center; margin-top:30px; font-size:13px; color:#bbaecb; }
+  .page { display: flex; justify-content: center; align-items: flex-start; gap: 24px; }
+  .wrap { flex: 0 1 1000px; min-width: 0; }
 
+  /* 顶栏 */
+  .site-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 2px 0; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 21px; font-weight: 800; letter-spacing: .2px; }
+  .brand .logo { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--accent); color: #fff; font-size: 20px; box-shadow: 0 4px 12px rgba(79,108,247,.35); }
+  .langbar { display: flex; gap: 5px; }
+  .langbar button { border: 1px solid var(--line); background: #fff; color: var(--muted); font-weight: 700;
+    font-size: 12px; padding: 6px 11px; border-radius: 9px; cursor: pointer; font-family: inherit; }
+  .langbar button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Hero */
+  .hero { text-align: center; padding: 46px 10px 38px; }
+  .hero h1 { margin: 0 0 12px; font-size: 38px; line-height: 1.15; font-weight: 800; letter-spacing: -.5px; }
+  .hero p { margin: 0 auto; max-width: 560px; font-size: 17px; color: var(--muted); line-height: 1.6; }
+
+  /* 系列分区 */
+  .series { margin-top: 14px; }
+  .series-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .series-head h2 { margin: 0; font-size: 22px; font-weight: 800; position: relative; padding-left: 14px; }
+  .series-head h2::before { content:''; position: absolute; left: 0; top: 4px; bottom: 4px; width: 5px;
+    border-radius: 3px; background: linear-gradient(180deg, #ff8fb7, #ff5f9e); }
+  .series-head p { margin: 0; font-size: 14px; color: var(--muted); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px;
+    display: flex; flex-direction: column; align-items: flex-start;
+    box-shadow: 0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.05);
+    transition: transform .16s, box-shadow .16s, border-color .16s; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 4px 10px rgba(20,30,60,.08), 0 16px 36px rgba(20,30,60,.1);
+    border-color: #d7dcea; }
+  .card .icon { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+    font-size: 28px; background: #f3f5fa; margin-bottom: 14px; }
+  .card .name { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .card .desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; flex: 1; }
+  .card .play { margin-top: 16px; align-self: stretch; text-align: center; padding: 11px;
+    border-radius: 11px; font-size: 15px; font-weight: 800; color: #fff;
+    background: var(--accent); transition: background .16s; }
+  .card:hover .play { background: var(--accent-dark); }
+  .badge { display:inline-block; font-size:11px; font-weight:800; color:var(--accent); background:var(--accent-soft);
+    padding:3px 9px; border-radius:999px; }
+
+  .more { margin-top: 26px; padding: 22px; text-align: center; border: 1.5px dashed #d3d9e6;
+    border-radius: 16px; color: var(--muted); font-size: 14.5px; font-weight: 600; background: rgba(255,255,255,.5); }
+
+  .foot { text-align: center; margin-top: 34px; font-size: 13px; color: #9aa3b2; }
+
+  /* 广告位（中性灰，配大众通用主页） */
   .ad-rail { flex: 0 0 160px; height: 600px; position: sticky; top: 22px;
-    background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
-    border: 2px dashed #ffc2da; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-    color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; }
+    background: repeating-linear-gradient(45deg, #f2f4f8, #f2f4f8 12px, #e9edf3 12px, #e9edf3 24px);
+    border: 2px dashed #cfd6e2; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    color: #9aa3b2; font-weight: 700; font-size: 14px; text-align: center; padding: 10px; }
   @media (max-width: 1360px) { .ad-rail { display: none; } }
+  @media (max-width: 560px) { .hero h1 { font-size: 30px; } .hero { padding: 34px 6px 28px; } }
 </style>
 </head>
 <body>
   <div class="page">
-  <aside class="ad-rail left">📢 Ad<br>(left)</aside>
+  <aside class="ad-rail left">Ad</aside>
   <div class="wrap">
-    <div class="topbar">
-      <h1 id="h1">🎀 Cute Mini Games 🎀</h1>
+    <header class="site-head">
+      <div class="brand"><span class="logo">⭐</span> <span id="brand"></span></div>
       <div class="langbar">
         <button data-lang="en" onclick="setLang('en')">EN</button>
         <button data-lang="zh" onclick="setLang('zh')">中</button>
         <button data-lang="es" onclick="setLang('es')">ES</button>
       </div>
-    </div>
-    <div class="sub" id="sub"></div>
+    </header>
 
-    <div class="cards">
-      <a class="card g1" href="大富翁.html">
-        <div class="icon">🎲</div><div class="name" id="n_mono"></div>
-        <div class="desc" id="d_mono"></div><div class="play playword"></div>
-      </a>
-      <a class="card" href="五子棋.html">
-        <div class="icon">⭕</div><div class="name" id="n_gomo"></div>
-        <div class="desc" id="d_gomo"></div><div class="play playword"></div>
-      </a>
-      <a class="card g2" href="黑白棋.html">
-        <div class="icon">🟢</div><div class="name" id="n_rev"></div>
-        <div class="desc" id="d_rev"></div><div class="play playword"></div>
-      </a>
-    </div>
+    <section class="hero">
+      <h1 id="heroTitle"></h1>
+      <p id="tagline"></p>
+    </section>
 
+    <section class="series">
+      <div class="series-head">
+        <h2 id="catCute"></h2>
+        <p id="catCuteDesc"></p>
+      </div>
+      <div class="cards">
+        <a class="card" href="大富翁.html">
+          <div class="icon">🎲</div><div class="name" id="n_mono"></div>
+          <div class="desc" id="d_mono"></div><div class="play playword"></div>
+        </a>
+        <a class="card" href="五子棋.html">
+          <div class="icon">⭕</div><div class="name" id="n_gomo"></div>
+          <div class="desc" id="d_gomo"></div><div class="play playword"></div>
+        </a>
+        <a class="card" href="黑白棋.html">
+          <div class="icon">🟢</div><div class="name" id="n_rev"></div>
+          <div class="desc" id="d_rev"></div><div class="play playword"></div>
+        </a>
+      </div>
+    </section>
+
+    <div class="more" id="moreSoon"></div>
     <div class="foot" id="foot"></div>
   </div>
-  <aside class="ad-rail right">📢 Ad<br>(right)</aside>
+  <aside class="ad-rail right">Ad</aside>
   </div>
 
 <script>
 "use strict";
 const STR = {
-  en: { title:'🎀 Cute Mini Games 🎀', titlePlain:'Cute Mini Games · 2 Players',
-    sub:'Two players · One device · Just open and play', play:'Play ▶',
-    foot:'🎀 Two-player mini-games · Free · No download',
-    metaDesc:'Cute two-player mini-games: Monopoly, Gomoku, Reversi. One device, two players, free, no download.',
-    n_mono:'Cute Monopoly', d_mono:'Roll dice, buy lands, build houses, collect tolls — bankrupt your rivals! (2–4 players)',
-    n_gomo:'Cute Gomoku', d_gomo:'Take turns placing stones — first to line up five wins!',
-    n_rev:'Cute Reversi', d_rev:'Trap to flip; most stones wins — big comebacks every game!' },
-  zh: { title:'🎀 萌萌小游戏 🎀', titlePlain:'萌萌小游戏 · 双人对战',
-    sub:'两个人 · 一台设备 · 打开就能玩', play:'开始玩 ▶',
-    foot:'🎀 双人小游戏合集 · 免费 · 免下载',
-    metaDesc:'可爱风双人小游戏：大富翁、五子棋、黑白棋。一台设备两个人玩，免费、免下载。',
-    n_mono:'萌萌大富翁', d_mono:'掷骰子买地、盖房、收过路费，让对手破产！（2–4 人）',
+  en: { brand:'KTStar games', titlePlain:'KTStar games — Free Online Games',
+    heroTitle:'Play together, right in your browser',
+    tagline:'Free online mini-games to play with a friend — no download, works on phone, tablet and desktop.',
+    catCute:'Cute Games', catCuteDesc:'Charming, candy-colored two-player games.',
+    moreSoon:'✨ More game series coming soon — classic, puzzle, casual and more.',
+    play:'Play', foot:'Free to play · No download · Phone, tablet & desktop',
+    metaDesc:'Free online mini-games to play with a friend in your browser. Cute two-player board games: Monopoly, Gomoku, Reversi. No download.',
+    n_mono:'Cute Monopoly', d_mono:'Roll dice, buy lands and build houses — bankrupt your rivals! 2–4 players.',
+    n_gomo:'Cute Gomoku', d_gomo:'Take turns placing stones — first to line up five in a row wins!',
+    n_rev:'Cute Reversi', d_rev:'Trap to flip the board; most stones wins — full of big comebacks!' },
+  zh: { brand:'KTStar games', titlePlain:'KTStar games — 免费在线小游戏',
+    heroTitle:'和朋友一起，打开浏览器就能玩',
+    tagline:'免费在线小游戏，和朋友一起玩——免下载，手机、平板、电脑都能玩。',
+    catCute:'可爱风系列', catCuteDesc:'糖果色、超可爱的双人小游戏。',
+    moreSoon:'✨ 更多游戏系列陆续上线——经典、益智、休闲等等。',
+    play:'开始玩', foot:'免费畅玩 · 免下载 · 手机/平板/电脑都能玩',
+    metaDesc:'免费在线小游戏，和朋友一起在浏览器里玩。可爱风双人棋类：大富翁、五子棋、黑白棋，免下载。',
+    n_mono:'萌萌大富翁', d_mono:'掷骰子买地、盖房，让对手破产！2–4 人。',
     n_gomo:'萌萌五子棋', d_gomo:'轮流落子，谁先把五颗连成一条线谁就赢！',
-    n_rev:'萌萌黑白棋', d_rev:'夹住对方就翻成自己的，棋子多者赢，常常大逆转！' },
-  es: { title:'🎀 Minijuegos Lindos 🎀', titlePlain:'Minijuegos Lindos · 2 Jugadores',
-    sub:'Dos jugadores · Un dispositivo · Abre y juega', play:'Jugar ▶',
-    foot:'🎀 Minijuegos para dos · Gratis · Sin descargas',
-    metaDesc:'Minijuegos lindos para dos: Monopoly, Gomoku, Reversi. Un dispositivo, dos jugadores, gratis, sin descargas.',
-    n_mono:'Monopoly Lindo', d_mono:'Tira dados, compra terrenos, construye casas y cobra peajes. ¡Haz quebrar a tus rivales! (2–4 jugadores)',
+    n_rev:'萌萌黑白棋', d_rev:'夹住对方就翻面，棋子多者赢，常常大逆转！' },
+  es: { brand:'KTStar games', titlePlain:'KTStar games — Juegos Gratis Online',
+    heroTitle:'Juega con un amigo, en tu navegador',
+    tagline:'Minijuegos gratis online para jugar con un amigo — sin descargas, en móvil, tablet y PC.',
+    catCute:'Juegos Lindos', catCuteDesc:'Encantadores juegos para dos con colores de caramelo.',
+    moreSoon:'✨ Más series de juegos muy pronto — clásicos, puzzles, casuales y más.',
+    play:'Jugar', foot:'Gratis · Sin descargas · Móvil, tablet y PC',
+    metaDesc:'Minijuegos gratis online para jugar con un amigo en el navegador. Juegos lindos para dos: Monopoly, Gomoku, Reversi. Sin descargas.',
+    n_mono:'Monopoly Lindo', d_mono:'Tira dados, compra terrenos y construye casas. ¡Haz quebrar a tus rivales! 2–4 jugadores.',
     n_gomo:'Gomoku Lindo', d_gomo:'Por turnos coloca fichas — ¡el primero en alinear cinco gana!',
-    n_rev:'Reversi Lindo', d_rev:'Atrapa para voltear; gana quien tenga más fichas. ¡Grandes remontadas!' }
+    n_rev:'Reversi Lindo', d_rev:'Atrapa para voltear el tablero; gana quien tenga más fichas. ¡Grandes remontadas!' }
 };
 let lang = localStorage.getItem('mz_lang') || 'en';
 const $ = id => document.getElementById(id);
@@ -112,7 +161,9 @@ function applyLang() {
   localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
   const s = STR[lang];
   document.title = s.titlePlain; $('metaDesc').setAttribute('content', s.metaDesc);
-  $('h1').textContent = s.title; $('sub').textContent = s.sub; $('foot').textContent = s.foot;
+  $('brand').textContent = s.brand; $('heroTitle').textContent = s.heroTitle; $('tagline').textContent = s.tagline;
+  $('catCute').textContent = s.catCute; $('catCuteDesc').textContent = s.catCuteDesc;
+  $('moreSoon').textContent = s.moreSoon; $('foot').textContent = s.foot;
   $('n_mono').textContent = s.n_mono; $('d_mono').textContent = s.d_mono;
   $('n_gomo').textContent = s.n_gomo; $('d_gomo').textContent = s.d_gomo;
   $('n_rev').textContent = s.n_rev; $('d_rev').textContent = s.d_rev;

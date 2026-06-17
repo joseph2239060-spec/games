@@ -1,96 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>萌萌五子棋</title>
+<title>Cute Gomoku</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0;
     font-family: "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
     background: linear-gradient(165deg, #fff1f6 0%, #e9f7ff 55%, #f3f0ff 100%);
-    color: #5a4a6a;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 14px;
+    color: #5a4a6a; min-height: 100vh; padding: 14px;
   }
-  .wrap { width: 100%; max-width: 1120px; }
+  body { overflow-x: hidden; }
+  .wrap { width: 100%; max-width: 1120px; margin: 0 auto; }
 
+  .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 14px; }
   h1 {
-    text-align: center;
-    font-size: 28px;
-    margin: 2px 0 14px;
-    letter-spacing: 4px;
-    color: #ff6fa5;
-    font-weight: 900;
-    text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(255,111,165,.25);
-    transform: rotate(-1.5deg);
+    text-align: center; font-size: 28px; margin: 0; letter-spacing: 4px;
+    color: #ff6fa5; font-weight: 900;
+    text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(255,111,165,.25); transform: rotate(-1.5deg);
   }
+  .langbar { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:4px; }
+  .langbar button {
+    border:2px solid #ffd0e3; background:#fff; color:#ff6fa5; font-weight:800; font-size:12px;
+    padding:5px 9px; border-radius:11px; cursor:pointer; font-family:inherit;
+  }
+  .langbar button.on { background:#ff6fa5; color:#fff; border-color:#ff6fa5; }
 
   .game { display: flex; gap: 24px; align-items: stretch; }
   .left { flex: 2; min-width: 0; }
   .right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 16px; }
-  @media (max-width: 820px) {
-    .game { flex-direction: column; }
-    .right { min-width: 0; }
-  }
+  @media (max-width: 820px) { .game { flex-direction: column; } .right { min-width: 0; } }
 
-  /* ===== 棋盘 ===== */
   .board {
-    display: grid;
-    grid-template-columns: repeat(15, 1fr);
-    grid-template-rows: repeat(15, 1fr);
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    background: #fbe6c4;
-    background-image: linear-gradient(160deg, #ffeccb, #f5d6a8);
-    padding: 14px;
-    border-radius: 22px;
-    border: 5px solid #ffd6a0;
+    display: grid; grid-template-columns: repeat(15, 1fr); grid-template-rows: repeat(15, 1fr);
+    aspect-ratio: 1 / 1; width: 100%;
+    background: #fbe6c4; background-image: linear-gradient(160deg, #ffeccb, #f5d6a8);
+    padding: 14px; border-radius: 22px; border: 5px solid #ffd6a0;
     box-shadow: 0 8px 22px rgba(210,150,90,.3), inset 0 0 0 2px #f0c896;
   }
-  .cell {
-    position: relative;
-    cursor: pointer;
-    border-right: 1px solid rgba(150,100,50,.32);
-    border-bottom: 1px solid rgba(150,100,50,.32);
-  }
-  /* 让网格线交叉点居中：右下边框，最后一行列去掉 */
-  .cell.last-col { border-right: none; }
-  .cell.last-row { border-bottom: none; }
-  .cell:hover::before {
-    content:''; position:absolute; inset:18%;
-    border-radius:50%; background: rgba(255,255,255,.45);
-  }
-  .cell.taken { cursor: default; }
-  .cell.taken:hover::before { display:none; }
+  .cell { position: relative; cursor: pointer;
+    border-right: 1px solid rgba(150,100,50,.32); border-bottom: 1px solid rgba(150,100,50,.32); }
+  .cell.last-col { border-right: none; } .cell.last-row { border-bottom: none; }
+  .cell:hover::before { content:''; position:absolute; inset:18%; border-radius:50%; background: rgba(255,255,255,.45); }
+  .cell.taken { cursor: default; } .cell.taken:hover::before { display:none; }
 
-  .stone {
-    position: absolute; inset: 11%;
-    border-radius: 50%;
-    animation: pop .18s cubic-bezier(.3,1.7,.5,1);
-    z-index: 2;
-  }
+  .stone { position: absolute; inset: 11%; border-radius: 50%; animation: pop .18s cubic-bezier(.3,1.7,.5,1); z-index: 2; }
   .stone.r { background: radial-gradient(circle at 35% 30%, #ffd6e6, #ff6fa5 58%, #e34d86);
     box-shadow: 0 2px 4px rgba(180,50,100,.45), inset 0 -3px 5px rgba(180,50,100,.4), inset 0 3px 5px rgba(255,255,255,.6); }
   .stone.b { background: radial-gradient(circle at 35% 30%, #d4ecff, #56b4ff 58%, #2f8fe6);
     box-shadow: 0 2px 4px rgba(40,110,180,.45), inset 0 -3px 5px rgba(40,110,180,.4), inset 0 3px 5px rgba(255,255,255,.6); }
   @keyframes pop { 0%{ transform: scale(0); } 100%{ transform: scale(1); } }
-  .stone.last::after {
-    content:''; position:absolute; inset:34%; border-radius:50%;
-    border:2px solid rgba(255,255,255,.9);
-  }
+  .stone.last::after { content:''; position:absolute; inset:34%; border-radius:50%; border:2px solid rgba(255,255,255,.9); }
   .stone.win { animation: winpulse .7s ease infinite; box-shadow: 0 0 0 3px #ffd76b, 0 0 14px #ffd76b; }
   @keyframes winpulse { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.18);} }
 
-  /* ===== 右侧面板 ===== */
-  .bubble {
-    background:#fff; border:3px solid #ffd0e3; color:#ff6fa5;
-    font-weight:900; font-size:19px; padding:12px 18px; border-radius:20px;
-    box-shadow:0 4px 0 #ffd0e3; text-align:center;
-  }
+  .bubble { background:#fff; border:3px solid #ffd0e3; color:#ff6fa5; font-weight:900; font-size:19px;
+    padding:12px 18px; border-radius:20px; box-shadow:0 4px 0 #ffd0e3; text-align:center; }
   .players { display:flex; gap:12px; }
   .pcard { flex:1; border-radius:18px; padding:12px; border:3px solid #fff; text-align:center;
     box-shadow:0 4px 0 rgba(150,120,150,.15); transition:transform .15s; }
@@ -110,215 +77,193 @@
   .tip b { color:#ff6fa5; }
 
   .actions { display:flex; gap:12px; }
-  button {
-    flex:1; border:none; border-radius:18px; padding:15px;
-    font-size:17px; font-weight:900; font-family:inherit; color:#fff;
-    background:linear-gradient(180deg,#ff9ec6,#ff6fa5);
+  button.act {
+    flex:1; border:none; border-radius:18px; padding:15px; font-size:17px; font-weight:900;
+    font-family:inherit; color:#fff; background:linear-gradient(180deg,#ff9ec6,#ff6fa5);
     box-shadow:0 5px 0 #e34d86; cursor:pointer; transition:transform .08s,box-shadow .08s;
   }
-  button:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
-  button.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
-  button:disabled { opacity:.5; box-shadow:none; transform:none; }
+  button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
+  button.act.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
 
-  body { overflow-x: hidden; }
-
-  /* 左右两边的竖条广告位 */
   .ad-side {
-    position: fixed; top: 50%; transform: translateY(-50%);
-    width: 160px; height: 600px;
+    position: fixed; top: 50%; transform: translateY(-50%); width: 160px; height: 600px;
     background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
-    border: 2px dashed #ffc2da; border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
+    border: 2px dashed #ffc2da; border-radius: 16px; display: flex; align-items: center; justify-content: center;
     color: #d99ab8; font-weight: 800; font-size: 14px; text-align: center; padding: 10px; z-index: 5;
   }
-  .ad-side.left { right: calc(50% + 575px); }
-  .ad-side.right { left: calc(50% + 575px); }
-  /* 屏幕不够宽时自动隐藏，避免挡住游戏 */
+  .ad-side.left { right: calc(50% + 575px); } .ad-side.right { left: calc(50% + 575px); }
   @media (max-width: 1520px) { .ad-side { display: none; } }
 
-  .overlay { position:fixed; inset:0; background:rgba(90,60,90,.45);
-    display:none; align-items:center; justify-content:center; z-index:10; }
+  .overlay { position:fixed; inset:0; background:rgba(90,60,90,.45); display:none; align-items:center; justify-content:center; z-index:10; }
   .overlay.show { display:flex; }
   .modal { background:#fff; border:4px solid #ffd0e3; border-radius:26px; padding:30px 28px;
     text-align:center; max-width:320px; box-shadow:0 14px 40px rgba(255,120,170,.4); }
-  .modal h2 { margin:0 0 10px; font-size:30px; color:#ff6fa5; }
+  .modal h2 { margin:0 0 10px; font-size:28px; color:#ff6fa5; }
   .modal p { margin:0 0 20px; font-size:15px; color:#9a8aaa; }
-  .modal button { width:100%; }
+  .modal button { width:100%; border:none; border-radius:18px; padding:15px; font-size:17px; font-weight:900;
+    font-family:inherit; color:#fff; background:linear-gradient(180deg,#ff9ec6,#ff6fa5); box-shadow:0 5px 0 #e34d86; cursor:pointer; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🎀 萌萌五子棋 🎀</h1>
-  <div class="game">
-    <div class="left">
-      <div class="board" id="board"></div>
+  <div class="topbar">
+    <h1 id="h1">🎀 Cute Gomoku 🎀</h1>
+    <div class="langbar">
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+      <button data-lang="zh" onclick="setLang('zh')">中</button>
+      <button data-lang="es" onclick="setLang('es')">ES</button>
     </div>
+  </div>
+  <div class="game">
+    <div class="left"><div class="board" id="board"></div></div>
     <div class="right">
-      <div class="bubble" id="bubble">轮到 🐰 红兔</div>
+      <div class="bubble" id="bubble"></div>
       <div class="players">
         <div class="pcard p0 active" id="pcard0">
-          <div class="dot r"></div>
-          <div class="nm">🐰 红兔</div>
-          <div class="cnt" id="cnt0">已落子 0</div>
+          <div class="dot r"></div><div class="nm" id="nm0"></div><div class="cnt" id="cnt0"></div>
         </div>
         <div class="pcard p1" id="pcard1">
-          <div class="dot b"></div>
-          <div class="nm">🐱 蓝猫</div>
-          <div class="cnt" id="cnt1">已落子 0</div>
+          <div class="dot b"></div><div class="nm" id="nm1"></div><div class="cnt" id="cnt1"></div>
         </div>
       </div>
-      <div class="tip">
-        🎯 <b>玩法</b>：两人轮流在棋盘上放棋子，<br>
-        谁先把 <b>5 颗自己的棋子连成一条线</b><br>
-        （横、竖、或斜），谁就赢啦！<br><br>
-        🏆 上一局赢的人，下一局先下子！<br>
-        （第一局 🐰 红兔先手）
-      </div>
+      <div class="tip" id="tip"></div>
       <div class="actions">
-        <button class="ghost" id="undoBtn" onclick="undo()">↩️ 悔棋</button>
-        <button onclick="restart()">🔄 重新开始</button>
+        <button class="act ghost" id="undoBtn" onclick="undo()"></button>
+        <button class="act" id="restartBtn" onclick="restart()"></button>
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- 左右两边的广告位：游戏上线 + 贴上广告代码后，这里会显示真实广告 -->
-<div class="ad-side left" id="adLeft">📢 广告位<br>（左）</div>
-<div class="ad-side right" id="adRight">📢 广告位<br>（右）</div>
+<div class="ad-side left">📢 Ad<br>(left)</div>
+<div class="ad-side right">📢 Ad<br>(right)</div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="modalTitle"></h2>
     <p id="modalText"></p>
-    <button onclick="restart()">🎀 再来一局</button>
+    <button onclick="restart()" id="againBtn"></button>
   </div>
 </div>
 
 <script>
 "use strict";
+const STR = {
+  en: { title:'🎀 Cute Gomoku 🎀', titlePlain:'Cute Gomoku',
+    turn:'Turn: {tok} {name}', gameEnd:'🎉 Game over', cnt:'Placed: {n}',
+    undoBtn:'↩️ Undo', restartBtn:'🔄 Restart', againBtn:'🎀 Play again',
+    winTitle:'🏆 {tok} {name} wins!', winText:'Five in a row — awesome!',
+    drawTitle:'🤝 Draw', drawText:'The board is full — nobody wins.',
+    names:['Rabbit','Cat'],
+    tip:'🎯 <b>How to play</b>: take turns placing a stone.<br>First to line up <b>5 of your own stones</b><br>(row, column, or diagonal) wins!<br><br>🏆 The winner of a round goes first next round.<br>(Rabbit 🐰 starts the first game.)' },
+  zh: { title:'🎀 萌萌五子棋 🎀', titlePlain:'萌萌五子棋',
+    turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束', cnt:'已落子 {n}',
+    undoBtn:'↩️ 悔棋', restartBtn:'🔄 重新开始', againBtn:'🎀 再来一局',
+    winTitle:'🏆 {tok} {name} 获胜！', winText:'五子连珠，太厉害啦～',
+    drawTitle:'🤝 平局', drawText:'棋盘满了，不分胜负～',
+    names:['兔兔','猫猫'],
+    tip:'🎯 <b>玩法</b>：两人轮流在棋盘上放棋子，<br>谁先把 <b>5 颗自己的棋子连成一条线</b><br>（横、竖、或斜），谁就赢啦！<br><br>🏆 上一局赢的人，下一局先手！<br>（第一局 🐰 兔兔先手）' },
+  es: { title:'🎀 Gomoku Lindo 🎀', titlePlain:'Gomoku Lindo',
+    turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego', cnt:'Fichas: {n}',
+    undoBtn:'↩️ Deshacer', restartBtn:'🔄 Reiniciar', againBtn:'🎀 Jugar otra vez',
+    winTitle:'🏆 ¡{tok} {name} gana!', winText:'¡Cinco en línea — genial!',
+    drawTitle:'🤝 Empate', drawText:'El tablero está lleno — nadie gana.',
+    names:['Conejo','Gato'],
+    tip:'🎯 <b>Cómo jugar</b>: por turnos coloca una ficha.<br>El primero en alinear <b>5 fichas propias</b><br>(fila, columna o diagonal) ¡gana!<br><br>🏆 El ganador de una ronda empieza la siguiente.<br>(Conejo 🐰 empieza la primera partida.)' }
+};
+let lang = localStorage.getItem('mz_lang') || 'en';
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o && o[k] !== undefined) ? o[k] : '');
+const L = (k, o) => fmt(STR[lang][k], o);
+const pName = i => STR[lang].names[i];
+
 const SIZE = 15;
-const P = [
-  { name:'红兔', token:'🐰', cls:'r' },
-  { name:'蓝猫', token:'🐱', cls:'b' },
-];
-let board, current, over, history;
-let lastWinner = null;   // 上一局赢家，下一局由他先下子
+const P = [ { token:'🐰', cls:'r' }, { token:'🐱', cls:'b' } ];
+let board, current, over, lastMove, history, lastWinner = null;
 const $ = id => document.getElementById(id);
 
 function buildBoard() {
-  const el = $('board');
-  el.innerHTML = '';
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      if (c === SIZE - 1) cell.classList.add('last-col');
-      if (r === SIZE - 1) cell.classList.add('last-row');
-      cell.id = 'c' + r + '_' + c;
-      cell.onclick = () => place(r, c);
-      el.appendChild(cell);
-    }
+  const el = $('board'); el.innerHTML = '';
+  for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+    const cell = document.createElement('div'); cell.className = 'cell';
+    if (c === SIZE - 1) cell.classList.add('last-col'); if (r === SIZE - 1) cell.classList.add('last-row');
+    cell.id = 'c' + r + '_' + c; cell.onclick = () => place(r, c); el.appendChild(cell);
   }
 }
-
 function reset() {
   board = Array.from({ length: SIZE }, () => Array(SIZE).fill(-1));
-  current = (lastWinner === null) ? 0 : lastWinner; over = false; history = [];
+  current = (lastWinner === null) ? 0 : lastWinner; over = false; lastMove = null; history = [];
   document.querySelectorAll('.cell').forEach(c => { c.className = 'cell'; c.innerHTML = '';
     const [r, cc] = c.id.slice(1).split('_').map(Number);
-    if (cc === SIZE - 1) c.classList.add('last-col');
-    if (r === SIZE - 1) c.classList.add('last-row');
-  });
-  $('overlay').classList.remove('show');
-  updatePanel();
+    if (cc === SIZE - 1) c.classList.add('last-col'); if (r === SIZE - 1) c.classList.add('last-row'); });
+  $('overlay').classList.remove('show'); updatePanel();
 }
-
 function updatePanel() {
-  $('bubble').textContent = over ? '🎉 游戏结束' : '轮到 ' + P[current].token + ' ' + P[current].name;
-  const cnt = [0, 0];
-  history.forEach(m => cnt[m.p]++);
-  $('cnt0').textContent = '已落子 ' + cnt[0];
-  $('cnt1').textContent = '已落子 ' + cnt[1];
+  $('bubble').textContent = over ? L('gameEnd') : L('turn', { tok: P[current].token, name: pName(current) });
+  const cnt = [0, 0]; (function(){ for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){ const v=board[r][c]; if(v>=0) cnt[v]++; } })();
+  $('cnt0').textContent = L('cnt', { n: cnt[0] }); $('cnt1').textContent = L('cnt', { n: cnt[1] });
+  $('nm0').textContent = P[0].token + ' ' + pName(0); $('nm1').textContent = P[1].token + ' ' + pName(1);
   $('pcard0').classList.toggle('active', current === 0 && !over);
   $('pcard1').classList.toggle('active', current === 1 && !over);
-  $('undoBtn').disabled = history.length === 0 || over;
+  $('undoBtn').disabled = !history || history.length === 0 || over;
 }
-
 function place(r, c) {
   if (over || board[r][c] !== -1) return;
-  board[r][c] = current;
-  history.push({ r, c, p: current });
-
-  // 去掉上一手的标记
+  board[r][c] = current; lastMove = { r, c }; history.push({ r, c, p: current });
   document.querySelectorAll('.stone.last').forEach(s => s.classList.remove('last'));
-  const cell = $('c' + r + '_' + c);
-  cell.classList.add('taken');
-  const stone = document.createElement('div');
-  stone.className = 'stone ' + P[current].cls + ' last';
-  cell.appendChild(stone);
-
+  const cell = $('c' + r + '_' + c); cell.classList.add('taken');
+  const stone = document.createElement('div'); stone.className = 'stone ' + P[current].cls + ' last'; cell.appendChild(stone);
   const winLine = checkWin(r, c, current);
   if (winLine) {
-    over = true;
-    lastWinner = current;   // 记住赢家，下一局他先手
+    over = true; lastWinner = current;
     winLine.forEach(([wr, wc]) => $('c' + wr + '_' + wc).querySelector('.stone').classList.add('win'));
     updatePanel();
-    setTimeout(() => {
-      $('modalTitle').textContent = '🏆 ' + P[current].token + ' ' + P[current].name + ' 获胜！';
-      $('modalText').textContent = '五子连珠，太厉害啦～';
-      $('overlay').classList.add('show');
-    }, 500);
+    setTimeout(() => { $('modalTitle').textContent = L('winTitle', { tok: P[current].token, name: pName(current) });
+      $('modalText').textContent = L('winText'); $('overlay').classList.add('show'); }, 500);
     return;
   }
-  if (history.length === SIZE * SIZE) {
-    over = true; updatePanel();
-    $('modalTitle').textContent = '🤝 平局';
-    $('modalText').textContent = '棋盘满了，不分胜负～';
-    $('overlay').classList.add('show');
-    return;
-  }
-  current = 1 - current;
-  updatePanel();
+  if (countStones() === SIZE * SIZE) { over = true; updatePanel();
+    $('modalTitle').textContent = L('drawTitle'); $('modalText').textContent = L('drawText'); $('overlay').classList.add('show'); return; }
+  current = 1 - current; updatePanel();
 }
-
+function countStones() { let n = 0; for (let r=0;r<SIZE;r++) for (let c=0;c<SIZE;c++) if (board[r][c] !== -1) n++; return n; }
 function undo() {
   if (over || history.length === 0) return;
   const last = history.pop();
-  board[last.r][last.c] = -1;
   const cell = $('c' + last.r + '_' + last.c);
-  cell.className = 'cell';
-  if (last.c === SIZE - 1) cell.classList.add('last-col');
-  if (last.r === SIZE - 1) cell.classList.add('last-row');
-  cell.innerHTML = '';
+  board[last.r][last.c] = -1; cell.className = 'cell'; cell.innerHTML = '';
+  if (last.c === SIZE - 1) cell.classList.add('last-col'); if (last.r === SIZE - 1) cell.classList.add('last-row');
   current = last.p;
-  // 给新的"最后一手"加标记
-  if (history.length) {
-    const prev = history[history.length - 1];
-    const s = $('c' + prev.r + '_' + prev.c).querySelector('.stone');
-    if (s) s.classList.add('last');
-  }
+  document.querySelectorAll('.stone.last').forEach(s => s.classList.remove('last'));
+  if (history.length) { const prev = history[history.length - 1];
+    const s = $('c' + prev.r + '_' + prev.c).querySelector('.stone'); if (s) s.classList.add('last'); lastMove = { r: prev.r, c: prev.c }; }
+  else lastMove = null;
   updatePanel();
 }
-
 function checkWin(r, c, p) {
   const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
   for (const [dr, dc] of dirs) {
     const line = [[r, c]];
-    for (let s = 1; s < 5; s++) { const nr = r + dr * s, nc = c + dc * s;
-      if (nr<0||nc<0||nr>=SIZE||nc>=SIZE||board[nr][nc]!==p) break; line.push([nr, nc]); }
-    for (let s = 1; s < 5; s++) { const nr = r - dr * s, nc = c - dc * s;
-      if (nr<0||nc<0||nr>=SIZE||nc>=SIZE||board[nr][nc]!==p) break; line.unshift([nr, nc]); }
+    for (let s = 1; s < 5; s++) { const nr = r+dr*s, nc = c+dc*s; if (nr<0||nc<0||nr>=SIZE||nc>=SIZE||board[nr][nc]!==p) break; line.push([nr, nc]); }
+    for (let s = 1; s < 5; s++) { const nr = r-dr*s, nc = c-dc*s; if (nr<0||nc<0||nr>=SIZE||nc>=SIZE||board[nr][nc]!==p) break; line.unshift([nr, nc]); }
     if (line.length >= 5) return line;
   }
   return null;
 }
-
 function restart() { reset(); }
 
-// 启动
+function applyLang() {
+  localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
+  document.title = STR[lang].titlePlain;
+  $('h1').textContent = L('title'); $('tip').innerHTML = L('tip');
+  $('undoBtn').textContent = L('undoBtn'); $('restartBtn').textContent = L('restartBtn'); $('againBtn').textContent = L('againBtn');
+  document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  updatePanel();
+}
+function setLang(l) { lang = l; applyLang(); }
+
 buildBoard();
 reset();
+applyLang();
 </script>
 </body>
 </html>

@@ -1,183 +1,123 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>萌萌大富翁</title>
+<title>Cute Monopoly</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0;
     font-family: "PingFang SC", "Microsoft YaHei", "Heiti SC", sans-serif;
     background: linear-gradient(165deg, #fff1f6 0%, #e9f7ff 55%, #f3f0ff 100%);
-    color: #5a4a6a;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 10px;
+    color: #5a4a6a; min-height: 100vh;
+    display: flex; justify-content: center; padding: 10px;
   }
+  body { overflow-x: hidden; }
   .wrap { width: 100%; max-width: 1120px; }
 
-  /* 左右两栏布局：地图在左(约2/3)，操作在右 */
+  .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 10px; }
+  h1 {
+    text-align: center; font-size: 26px; margin: 0; letter-spacing: 3px;
+    color: #ff6fa5; font-weight: 900;
+    text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(255,111,165,.25); transform: rotate(-1.5deg);
+  }
+  .langbar { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:4px; }
+  .langbar button {
+    border:2px solid #ffd0e3; background:#fff; color:#ff6fa5; font-weight:800; font-size:12px;
+    padding:5px 9px; border-radius:11px; cursor:pointer; font-family:inherit;
+  }
+  .langbar button.on { background:#ff6fa5; color:#fff; border-color:#ff6fa5; }
+
   .game { display: flex; gap: 24px; align-items: stretch; }
   .left { flex: 2; min-width: 0; }
-  .right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
-  .right .players, .right .log, .right .actions { margin: 0; }
-  .right .log { flex: 1; height: auto; min-height: 90px; }
-  @media (max-width: 820px) {
-    .game { flex-direction: column; }
-    .right { min-width: 0; }
-    .right .log { flex: none; height: 66px; }
-  }
-
-  h1 {
-    text-align: center;
-    font-size: 26px;
-    margin: 2px 0 10px;
-    letter-spacing: 3px;
-    color: #ff6fa5;
-    font-weight: 900;
-    text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(255,111,165,.25);
-    transform: rotate(-1.5deg);
-  }
+  .right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 12px; }
+  @media (max-width: 820px) { .game { flex-direction: column; } .right { min-width: 0; } }
 
   /* ===== 棋盘 ===== */
   .board {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    gap: 4px;
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    background: #fff;
-    padding: 6px;
-    border-radius: 22px;
-    border: 4px solid #ffd6e7;
+    display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+    gap: 4px; aspect-ratio: 1 / 1; width: 100%;
+    background: #fff; padding: 6px; border-radius: 22px; border: 4px solid #ffd6e7;
     box-shadow: 0 8px 20px rgba(255,150,190,.25);
   }
   .cell {
-    position: relative;
-    background: #fffdfa;
-    border-radius: 10px;
-    padding: 2px 3px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    font-size: 12px;
-    line-height: 1.15;
-    border: 2px solid #f3e8ef;
-    box-shadow: 0 2px 0 #f0e2ec;
+    position: relative; background: #fffdfa; border-radius: 10px; padding: 2px 3px;
+    display: flex; flex-direction: column; overflow: hidden;
+    font-size: 12px; line-height: 1.1; border: 2px solid #f3e8ef; box-shadow: 0 2px 0 #f0e2ec;
   }
   .cell .stripe { height: 9px; border-radius: 4px; margin: -1px -1px 3px; }
-  .cell .nm { font-weight: 800; font-size: 14px; color: #5a4a6a; }
-  .cell .pr { color: #ff7aab; font-size: 12px; font-weight: 700; margin-top: auto; }
+  .cell .nm { font-weight: 800; font-size: 13px; color: #5a4a6a; }
+  .cell .pr { color: #ff7aab; font-size: 11px; font-weight: 700; margin-top: auto; }
   .cell .houses { position: absolute; top: 12px; right: 3px; font-size: 11px; letter-spacing:-2px; }
   .cell.special { align-items: center; justify-content: center; text-align: center; gap: 2px; }
-  .cell.special .ic { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.12)); }
-  .cell.special .nm { font-size: 13px; }
+  .cell.special .ic { font-size: 28px; line-height: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.12)); }
+  .cell.special .nm { font-size: 12px; }
   .cell.c-start { background: #fff7d6; border-color:#ffe79e; }
   .cell.c-jail  { background: #e6f0ff; border-color:#bcd6ff; }
   .cell.c-bonus { background: #e8ffe9; border-color:#b6f0bb; }
   .cell.c-fate  { background: #f3e8ff; border-color:#dcc4ff; }
-  .cell.owned-0 { border-color:#ff6b9d; box-shadow:0 0 0 1px #ff6b9d, 0 2px 0 #ffd0e0; }
-  .cell.owned-1 { border-color:#56b4ff; box-shadow:0 0 0 1px #56b4ff, 0 2px 0 #c9e6ff; }
 
-  /* 立体棋子 */
-  .tokens { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; pointer-events:none; }
+  .tokens { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; flex-wrap:wrap; justify-content: center; gap: 0px; pointer-events:none; }
   .piece {
-    position: relative;
-    font-size: 32px;
-    line-height: 1;
-    filter: drop-shadow(0 4px 3px rgba(90,40,80,.4));
+    position: relative; font-size: 22px; line-height: 1;
+    filter: drop-shadow(0 3px 2px rgba(90,40,80,.4));
     transition: transform .18s cubic-bezier(.3,1.6,.5,1);
   }
-  .piece::after {
-    content:''; position:absolute; left:50%; bottom:-4px; width:24px; height:7px;
-    transform: translateX(-50%);
-    background: rgba(120,80,120,.28); border-radius:50%; filter: blur(1.5px); z-index:-1;
-  }
   .piece.hop { animation: hop .2s ease; }
-  @keyframes hop { 0%,100%{ transform: translateY(0) scale(1);} 50%{ transform: translateY(-14px) scale(1.12);} }
+  @keyframes hop { 0%,100%{ transform: translateY(0) scale(1);} 50%{ transform: translateY(-12px) scale(1.12);} }
 
-  /* ===== 中心区 ===== */
   .center {
-    grid-row: 2 / 8;
-    grid-column: 2 / 8;
+    grid-row: 2 / 8; grid-column: 2 / 8;
     background: linear-gradient(160deg,#fff6fb,#eef9ff);
-    border-radius: 18px;
-    border: 3px dashed #ffd0e3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 10px;
+    border-radius: 18px; border: 3px dashed #ffd0e3;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 10px;
   }
   .bubble {
-    background:#fff; border:3px solid #ffd0e3; color:#ff6fa5;
-    font-weight:900; font-size:16px; padding:6px 16px; border-radius:20px;
-    box-shadow:0 3px 0 #ffd0e3; position:relative;
+    background:#fff; border:3px solid #ffd0e3; color:#ff6fa5; font-weight:900; font-size:16px;
+    padding:6px 16px; border-radius:20px; box-shadow:0 3px 0 #ffd0e3; position:relative; text-align:center;
   }
-  .bubble::after{ content:''; position:absolute; left:50%; bottom:-9px; transform:translateX(-50%);
-    border:7px solid transparent; border-top-color:#ffd0e3; }
-
-  /* 立体骰子 */
   .dice-stage { display:flex; gap:26px; perspective:700px; padding:10px 0; }
   .die3d { width:70px; height:70px; position:relative; transform-style:preserve-3d;
     transition: transform 1.05s cubic-bezier(.25,.9,.3,1.15); transform: rotateX(-20deg) rotateY(20deg); }
   .face {
     position:absolute; width:70px; height:70px;
-    background:linear-gradient(150deg,#ffffff,#fff0f6);
-    border-radius:13px; border:2px solid #ffd9e8;
+    background:linear-gradient(150deg,#ffffff,#fff0f6); border-radius:13px; border:2px solid #ffd9e8;
     box-shadow: inset 0 3px 6px rgba(255,255,255,.9), inset 0 -4px 8px rgba(255,160,200,.35);
-    display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
-    padding:9px; gap:2px;
+    display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); padding:9px; gap:2px;
   }
   .pip { width:10px; height:10px; border-radius:50%; align-self:center; justify-self:center;
-    background:radial-gradient(circle at 35% 30%, #ff9ec4, #ff5f9e);
-    box-shadow:0 1px 1px rgba(200,60,110,.5); }
-  .sum { font-size:13px; font-weight:800; color:#7a9; min-height:16px; color:#8aa; }
+    background:radial-gradient(circle at 35% 30%, #ff9ec4, #ff5f9e); box-shadow:0 1px 1px rgba(200,60,110,.5); }
+  .sum { font-size:13px; font-weight:800; color:#8aa; min-height:16px; }
   .sum b { color:#ff6fa5; }
 
-  /* ===== 玩家卡 ===== */
-  .players { display:flex; gap:10px; margin:12px 0 0; }
-  .pcard { flex:1; border-radius:18px; padding:9px 12px; border:3px solid #fff;
+  .players { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .pcard { border-radius:16px; padding:8px 10px; border:3px solid #fff; background:var(--l);
     box-shadow:0 4px 0 rgba(150,120,150,.15); transition:transform .15s; }
-  .pcard.p0 { background:linear-gradient(160deg,#fff0f6,#ffe0ec); }
-  .pcard.p1 { background:linear-gradient(160deg,#eef6ff,#dcecff); }
-  .pcard.active { transform:translateY(-3px) scale(1.02); }
-  .pcard.p0.active { border-color:#ff6b9d; box-shadow:0 0 0 2px #ff6b9d,0 6px 0 #ffc9dd; }
-  .pcard.p1.active { border-color:#56b4ff; box-shadow:0 0 0 2px #56b4ff,0 6px 0 #c2e1ff; }
-  .pcard .ph { display:flex; align-items:center; gap:6px; font-weight:900; font-size:15px; }
-  .pcard .money { font-size:22px; font-weight:900; margin:2px 0; }
-  .pcard.p0 .money { color:#ff4f8b; } .pcard.p1 .money { color:#2f8fe6; }
+  .pcard.active { transform:translateY(-3px) scale(1.02); border-color:var(--c); box-shadow:0 0 0 2px var(--c),0 6px 0 var(--l); }
+  .pcard.dead { opacity:.45; filter:grayscale(.6); }
+  .pcard .ph { display:flex; align-items:center; gap:5px; font-weight:900; font-size:14px; }
+  .pcard .money { font-size:20px; font-weight:900; margin:2px 0; color:var(--d); }
   .pcard .land { font-size:11px; color:#9a8aaa; }
 
-  /* 日志 */
   .log { background:#fff; border:3px solid #ffe1ee; border-radius:16px; padding:8px 12px;
-    height:66px; overflow-y:auto; font-size:13px; line-height:1.5; margin-top:12px; }
+    flex:1; min-height:80px; overflow-y:auto; font-size:13px; line-height:1.5; }
   .log p { margin:0 0 2px; color:#9a8aaa; }
-  .log p:first-child { color:#ff6fa5; font-weight:800; }
+  .log p:first-child { color:#ff6fa5; font-weight:700; }
 
-  /* 按钮 */
-  .actions { display:flex; gap:10px; margin-top:12px; }
-  button {
-    flex:1; border:none; border-radius:18px; padding:16px;
-    font-size:18px; font-weight:900; font-family:inherit; color:#fff;
-    background:linear-gradient(180deg,#ff9ec6,#ff6fa5);
+  .actions { display:flex; gap:10px; }
+  button.act {
+    flex:1; border:none; border-radius:18px; padding:16px; font-size:17px; font-weight:900;
+    font-family:inherit; color:#fff; background:linear-gradient(180deg,#ff9ec6,#ff6fa5);
     box-shadow:0 5px 0 #e34d86; cursor:pointer; transition:transform .08s,box-shadow .08s;
   }
-  button:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
-  button.green { background:linear-gradient(180deg,#9be7a3,#5fd070); box-shadow:0 5px 0 #3fae52; }
-  button.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
-  button:disabled { opacity:.5; box-shadow:none; transform:none; }
-
-  body { overflow-x: hidden; }
+  button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
+  button.act.green { background:linear-gradient(180deg,#9be7a3,#5fd070); box-shadow:0 5px 0 #3fae52; }
+  button.act.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
 
   /* 左右两边的竖条广告位 */
   .ad-side {
-    position: fixed; top: 50%; transform: translateY(-50%);
-    width: 160px; height: 600px;
+    position: fixed; top: 50%; transform: translateY(-50%); width: 160px; height: 600px;
     background: repeating-linear-gradient(45deg, #fff6fb, #fff6fb 12px, #fdeef6 12px, #fdeef6 24px);
     border: 2px dashed #ffc2da; border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
@@ -191,385 +131,452 @@
     display:none; align-items:center; justify-content:center; z-index:10; }
   .overlay.show { display:flex; }
   .modal { background:#fff; border:4px solid #ffd0e3; border-radius:26px; padding:28px 26px;
-    text-align:center; max-width:300px; box-shadow:0 14px 40px rgba(255,120,170,.4); }
-  .modal h2 { margin:0 0 8px; font-size:30px; color:#ff6fa5; }
+    text-align:center; max-width:340px; box-shadow:0 14px 40px rgba(255,120,170,.4); }
+  .modal h2 { margin:0 0 10px; font-size:26px; color:#ff6fa5; }
   .modal p { margin:0 0 18px; font-size:15px; color:#9a8aaa; }
+  .modal .pbtns { display:flex; gap:12px; justify-content:center; }
+  .modal button {
+    border:none; border-radius:18px; padding:16px 22px; font-size:20px; font-weight:900;
+    font-family:inherit; color:#fff; background:linear-gradient(180deg,#ff9ec6,#ff6fa5);
+    box-shadow:0 5px 0 #e34d86; cursor:pointer; min-width:64px;
+  }
+  .modal button:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🎀 萌萌大富翁 🎀</h1>
-  <div class="game">
-    <div class="left">
-      <div class="board" id="board"></div>
+  <div class="topbar">
+    <h1 id="h1">🎀 Cute Monopoly 🎀</h1>
+    <div class="langbar">
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+      <button data-lang="zh" onclick="setLang('zh')">中</button>
+      <button data-lang="es" onclick="setLang('es')">ES</button>
     </div>
+  </div>
+  <div class="game">
+    <div class="left"><div class="board" id="board"></div></div>
     <div class="right">
-      <div class="players">
-        <div class="pcard p0" id="pcard0">
-          <div class="ph">🐰 红兔</div>
-          <div class="money" id="money0">¥2000</div>
-          <div class="land" id="land0">地产：0 块</div>
-        </div>
-        <div class="pcard p1" id="pcard1">
-          <div class="ph">🐱 蓝猫</div>
-          <div class="money" id="money1">¥2000</div>
-          <div class="land" id="land1">地产：0 块</div>
-        </div>
-      </div>
+      <div class="players" id="playersBox"></div>
       <div class="log" id="log"></div>
       <div class="actions" id="actions"></div>
     </div>
   </div>
 </div>
 
-<!-- 左右两边的广告位：游戏上线 + 贴上广告代码后，这里会显示真实广告 -->
-<div class="ad-side left" id="adLeft">📢 广告位<br>（左）</div>
-<div class="ad-side right" id="adRight">📢 广告位<br>（右）</div>
+<div class="ad-side left">📢 Ad<br>(left)</div>
+<div class="ad-side right">📢 Ad<br>(right)</div>
 
+<!-- 选人数 -->
+<div class="overlay" id="setup">
+  <div class="modal">
+    <h2 id="setupTitle">How many players?</h2>
+    <p id="setupSub">Pick 2 to 4 players</p>
+    <div class="pbtns">
+      <button onclick="startGame(2)">👥 2</button>
+      <button onclick="startGame(3)">👥 3</button>
+      <button onclick="startGame(4)">👥 4</button>
+    </div>
+  </div>
+</div>
+
+<!-- 结束 -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="modalTitle"></h2>
     <p id="modalText"></p>
-    <button onclick="location.reload()">🔄 再来一局</button>
+    <div class="pbtns"><button onclick="location.reload()" id="againBtn">🔄</button></div>
   </div>
 </div>
 
 <script>
 "use strict";
 
-const SALARY = 300;
-const START_MONEY = 2000;
-const RENT_MULT = [1, 2, 4, 7, 11];     // 等级 0~4 的租金倍数
-const HOUSE_ICON = ['', '🏠', '🏠🏠', '🏠🏠🏠', '🏨'];
+/* ============ 多语言 ============ */
+const STR = {
+  en: {
+    title:'🎀 Cute Monopoly 🎀', titlePlain:'Cute Monopoly',
+    setupTitle:'How many players?', setupSub:'Pick 2 to 4 players',
+    landLabel:'Lands: {n}', turn:'Turn: {tok} {name}', gameEnd:'🎉 Game over',
+    rollBtn:'🎲 {name} roll', rolling:'🎲 Rolling…',
+    skipTurnBtn:'{tok} skip a turn ▶', nextBtn:'{tok} {name}\'s turn ▶',
+    buyBtn:'Buy ¥{price}', noBuyBtn:'Don\'t buy',
+    buildHouse:'🔨 Build house {n} ¥{cost}', buildHotel:'🔨 Build hotel ¥{cost}', noBuild:'Not now',
+    againBtn:'🔄 Play again',
+    gameOverTitle:'🏆 {tok} {name} wins!', gameOverText:'{name} is the last one standing — congrats!',
+    startMsg:'Game start! {name} goes first. Tap the button to roll ✨',
+    logRoll:'🎲 {name} rolled {n}', logSalary:'💰 {name} passed Start, +¥{s}',
+    logBuy:'🏘️ {name} bought {tile} (¥{price})', logRent:'💸 {name} paid {owner} a toll of ¥{r}',
+    logOwn:'{name} is back on own {tile}', logOwnHotel:'{name} is back on own {tile} (hotel)',
+    logNoMoney:'{name} reached {tile} but can\'t afford it',
+    logUpgrade:'🔨 {name} upgraded {tile} to lv {lv}, toll now ¥{r}',
+    logRest:'😴 {name} rests, skip next turn', logBonus:'🎁 {name} got a bonus of ¥{b}',
+    logStart:'🏠 {name} stopped on Start', logBankrupt:'💔 {name} went bankrupt!', logSkipped:'{name} rested a turn',
+    chancePre:'🍀 Chance: ', fatePre:'🎲 Fate: ',
+    chances:['Found a wallet, +¥120','Won a raffle, +¥200','Sold candy, +¥100',
+      'Paid sweets tax, -¥120','Littering fine, -¥100','Dentist bill, -¥150',
+      'Lucky! Go to Start and collect ¥{s}','Too sleepy — go rest, skip a turn'],
+    tiles:{start:'Start',jail:'Rest',bonus:'Bonus',fate:'Fate',chance:'Chance',
+      cotton:'Candy',lolly:'Lolly',pudding:'Pudding',jelly:'Jelly',strawberry:'Berry',blueberry:'B.Berry',
+      peach:'Peach',watermelon:'Melon',pineapple:'Pineapple',donut:'Donut',macaron:'Macaron',chocolate:'Choco',
+      caramel:'Caramel',pastry:'Pastry',matcha:'Matcha',mango:'Mango',rainbow:'Rainbow',starry:'Starry',cloud:'Cloud'},
+    names:['Rabbit','Cat','Dog','Frog']
+  },
+  zh: {
+    title:'🎀 萌萌大富翁 🎀', titlePlain:'萌萌大富翁',
+    setupTitle:'几个人玩？', setupSub:'选择 2 到 4 人',
+    landLabel:'地产：{n} 块', turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束',
+    rollBtn:'🎲 {name} 掷骰子', rolling:'🎲 掷骰子中…',
+    skipTurnBtn:'{tok} 暂停一回合 ▶', nextBtn:'轮到 {tok} {name} ▶',
+    buyBtn:'买下 ¥{price}', noBuyBtn:'暂不购买',
+    buildHouse:'🔨 盖第{n}栋房 ¥{cost}', buildHotel:'🔨 升级为旅馆 ¥{cost}', noBuild:'暂不升级',
+    againBtn:'🔄 再来一局',
+    gameOverTitle:'🏆 {tok} {name} 获胜！', gameOverText:'{name} 是最后的赢家，恭喜～',
+    startMsg:'游戏开始！{name} 先手，点击下方按钮掷骰子 ✨',
+    logRoll:'🎲 {name} 掷出 {n} 点', logSalary:'💰 {name} 经过起点，领 ¥{s}',
+    logBuy:'🏘️ {name} 买下了 {tile}（¥{price}）', logRent:'💸 {name} 付给 {owner} 过路费 ¥{r}',
+    logOwn:'{name} 回到自己的 {tile}', logOwnHotel:'{name} 回到自己的 {tile}（已是旅馆）',
+    logNoMoney:'{name} 来到 {tile}，但钱不够买',
+    logUpgrade:'🔨 {name} 把 {tile} 升到 {lv} 级，租金涨到 ¥{r}',
+    logRest:'😴 {name} 在休息站，下回合暂停', logBonus:'🎁 {name} 领取福利 ¥{b}',
+    logStart:'🏠 {name} 停在起点', logBankrupt:'💔 {name} 破产了！', logSkipped:'{name} 休息了一回合',
+    chancePre:'🍀 机会：', fatePre:'🎲 命运：',
+    chances:['路上捡到小钱包，获得 ¥120','抽奖中大奖，获得 ¥200','卖糖果赚了 ¥100',
+      '缴纳甜品税，支付 ¥120','乱丢糖纸被罚 ¥100','吃多了看牙医，支付 ¥150',
+      '好运！直接前进到起点，并领 ¥{s}','太困了，去休息站睡一觉，暂停一回合'],
+    tiles:{start:'起点',jail:'休息',bonus:'福利',fate:'命运',chance:'机会',
+      cotton:'棉花糖',lolly:'棒棒糖',pudding:'布丁屋',jelly:'果冻屋',strawberry:'草莓园',blueberry:'蓝莓园',
+      peach:'蜜桃湾',watermelon:'西瓜湾',pineapple:'菠萝湾',donut:'甜甜圈',macaron:'马卡龙',chocolate:'巧克力',
+      caramel:'焦糖城',pastry:'千层酥',matcha:'抹茶谷',mango:'芒果谷',rainbow:'彩虹堡',starry:'星空堡',cloud:'云朵顶'},
+    names:['兔兔','猫猫','狗狗','蛙蛙']
+  },
+  es: {
+    title:'🎀 Monopoly Lindo 🎀', titlePlain:'Monopoly Lindo',
+    setupTitle:'¿Cuántos jugadores?', setupSub:'Elige de 2 a 4 jugadores',
+    landLabel:'Terrenos: {n}', turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego',
+    rollBtn:'🎲 {name} tira', rolling:'🎲 Tirando…',
+    skipTurnBtn:'{tok} pierde un turno ▶', nextBtn:'Turno de {tok} {name} ▶',
+    buyBtn:'Comprar ¥{price}', noBuyBtn:'No comprar',
+    buildHouse:'🔨 Casa {n} ¥{cost}', buildHotel:'🔨 Hotel ¥{cost}', noBuild:'Ahora no',
+    againBtn:'🔄 Jugar otra vez',
+    gameOverTitle:'🏆 ¡{tok} {name} gana!', gameOverText:'{name} es el último en pie. ¡Felicidades!',
+    startMsg:'¡A jugar! {name} empieza. Toca el botón para tirar ✨',
+    logRoll:'🎲 {name} sacó {n}', logSalary:'💰 {name} pasó la Salida, +¥{s}',
+    logBuy:'🏘️ {name} compró {tile} (¥{price})', logRent:'💸 {name} pagó ¥{r} de peaje a {owner}',
+    logOwn:'{name} vuelve a su {tile}', logOwnHotel:'{name} vuelve a su {tile} (hotel)',
+    logNoMoney:'{name} llegó a {tile} pero no puede comprarlo',
+    logUpgrade:'🔨 {name} mejoró {tile} a nivel {lv}, peaje ahora ¥{r}',
+    logRest:'😴 {name} descansa, pierde el próximo turno', logBonus:'🎁 {name} ganó un premio de ¥{b}',
+    logStart:'🏠 {name} se detuvo en la Salida', logBankrupt:'💔 ¡{name} quebró!', logSkipped:'{name} descansó un turno',
+    chancePre:'🍀 Suerte: ', fatePre:'🎲 Destino: ',
+    chances:['Encontró una cartera, +¥120','Ganó una rifa, +¥200','Vendió dulces, +¥100',
+      'Pagó impuesto de dulces, -¥120','Multa por basura, -¥100','Factura del dentista, -¥150',
+      '¡Suerte! Ve a la Salida y cobra ¥{s}','Con mucho sueño — a descansar, pierde un turno'],
+    tiles:{start:'Salida',jail:'Descanso',bonus:'Premio',fate:'Destino',chance:'Suerte',
+      cotton:'Dulce',lolly:'Pirulí',pudding:'Pudín',jelly:'Gelatina',strawberry:'Fresa',blueberry:'Arándano',
+      peach:'Durazno',watermelon:'Sandía',pineapple:'Piña',donut:'Dona',macaron:'Macarrón',chocolate:'Choco',
+      caramel:'Caramelo',pastry:'Hojaldre',matcha:'Matcha',mango:'Mango',rainbow:'Arcoíris',starry:'Estrella',cloud:'Nube'},
+    names:['Conejo','Gato','Perro','Rana']
+  }
+};
+let lang = localStorage.getItem('mz_lang') || 'en';
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o && o[k] !== undefined) ? o[k] : '');
+const L = (k, o) => fmt(STR[lang][k], o);
+const tileName = key => STR[lang].tiles[key];
+const pName = i => STR[lang].names[i];
 
-// ===== 棋盘（28 格，糖果主题）=====
+/* ============ 游戏设定 ============ */
+const SALARY = 200;          // 每次经过起点的奖励
+const START_MONEY = 2000;
+const RENT_MULT = [1, 2, 4, 7, 11];
+const HOUSE_ICON = ['', '🏠', '🏠🏠', '🏠🏠🏠', '🏨'];
+const META = [
+  { token:'🐰', c:'#ff6b9d', l:'#ffe0ec', d:'#e34d86' },
+  { token:'🐱', c:'#56b4ff', l:'#dcecff', d:'#2f8fe6' },
+  { token:'🐶', c:'#ffb02e', l:'#fff0cf', d:'#d98a12' },
+  { token:'🐸', c:'#5fd070', l:'#dcf7e1', d:'#3aae52' },
+];
+
 const C = { pink:'#f9a8d4', yellow:'#fcd34d', red:'#fca5a5', green:'#86efac',
             blue:'#93c5fd', purple:'#c4b5fd', teal:'#5eead4', orange:'#fdba74' };
 const BOARD = [
-  { type:'start',  name:'起点', ic:'🏠', cls:'c-start' },
-  { type:'prop', name:'棉花糖', price:100, color:C.pink },
-  { type:'prop', name:'棒棒糖', price:100, color:C.pink },
-  { type:'chance', name:'机会', ic:'🍀', cls:'c-fate' },
-  { type:'prop', name:'布丁屋', price:120, color:C.yellow },
-  { type:'prop', name:'果冻屋', price:120, color:C.yellow },
-  { type:'chance', name:'机会', ic:'🍀', cls:'c-fate' },
-  { type:'jail',  name:'休息', ic:'😴', cls:'c-jail' },
-  { type:'prop', name:'草莓园', price:140, color:C.red },
-  { type:'prop', name:'蓝莓园', price:140, color:C.red },
-  { type:'chance', name:'机会', ic:'🍀', cls:'c-fate' },
-  { type:'prop', name:'蜜桃湾', price:160, color:C.green },
-  { type:'prop', name:'西瓜湾', price:160, color:C.green },
-  { type:'prop', name:'菠萝湾', price:180, color:C.green },
-  { type:'bonus', name:'福利', ic:'🎁', cls:'c-bonus' },
-  { type:'prop', name:'甜甜圈', price:180, color:C.blue },
-  { type:'prop', name:'马卡龙', price:200, color:C.blue },
-  { type:'chance', name:'机会', ic:'🍀', cls:'c-fate' },
-  { type:'prop', name:'巧克力', price:220, color:C.purple },
-  { type:'prop', name:'焦糖城', price:220, color:C.purple },
-  { type:'prop', name:'千层酥', price:240, color:C.purple },
-  { type:'fate',  name:'命运', ic:'🎲', cls:'c-fate' },
-  { type:'prop', name:'抹茶谷', price:260, color:C.teal },
-  { type:'prop', name:'芒果谷', price:260, color:C.teal },
-  { type:'chance', name:'机会', ic:'🍀', cls:'c-fate' },
-  { type:'prop', name:'彩虹堡', price:280, color:C.orange },
-  { type:'prop', name:'星空堡', price:300, color:C.orange },
-  { type:'prop', name:'云朵顶', price:320, color:C.orange },
+  { type:'start', key:'start', ic:'🏠', cls:'c-start' },
+  { type:'prop', key:'cotton', price:100, color:C.pink },
+  { type:'prop', key:'lolly', price:100, color:C.pink },
+  { type:'chance', key:'chance', ic:'🍀', cls:'c-fate' },
+  { type:'prop', key:'pudding', price:120, color:C.yellow },
+  { type:'prop', key:'jelly', price:120, color:C.yellow },
+  { type:'chance', key:'chance', ic:'🍀', cls:'c-fate' },
+  { type:'jail', key:'jail', ic:'😴', cls:'c-jail' },
+  { type:'prop', key:'strawberry', price:140, color:C.red },
+  { type:'prop', key:'blueberry', price:140, color:C.red },
+  { type:'chance', key:'chance', ic:'🍀', cls:'c-fate' },
+  { type:'prop', key:'peach', price:160, color:C.green },
+  { type:'prop', key:'watermelon', price:160, color:C.green },
+  { type:'prop', key:'pineapple', price:180, color:C.green },
+  { type:'bonus', key:'bonus', ic:'🎁', cls:'c-bonus' },
+  { type:'prop', key:'donut', price:180, color:C.blue },
+  { type:'prop', key:'macaron', price:200, color:C.blue },
+  { type:'chance', key:'chance', ic:'🍀', cls:'c-fate' },
+  { type:'prop', key:'chocolate', price:220, color:C.purple },
+  { type:'prop', key:'caramel', price:220, color:C.purple },
+  { type:'prop', key:'pastry', price:240, color:C.purple },
+  { type:'fate', key:'fate', ic:'🎲', cls:'c-fate' },
+  { type:'prop', key:'matcha', price:260, color:C.teal },
+  { type:'prop', key:'mango', price:260, color:C.teal },
+  { type:'chance', key:'chance', ic:'🍀', cls:'c-fate' },
+  { type:'prop', key:'rainbow', price:280, color:C.orange },
+  { type:'prop', key:'starry', price:300, color:C.orange },
+  { type:'prop', key:'cloud', price:320, color:C.orange },
 ];
-
-// 8x8 网格上每格的位置（顺时针一圈，28 格）
 const GRID_POS = [
   [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],
   [2,8],[3,8],[4,8],[5,8],[6,8],[7,8],[8,8],
   [8,7],[8,6],[8,5],[8,4],[8,3],[8,2],[8,1],
   [7,1],[6,1],[5,1],[4,1],[3,1],[2,1]
 ];
+const CHANCES = [ {d:120},{d:200},{d:100},{d:-120},{d:-100},{d:-150},{go0:true},{jail:true} ];
 
-const CHANCES = [
-  { d:+120, m:'路上捡到小钱包，获得 ¥120' },
-  { d:+200, m:'抽奖中大奖，获得 ¥200' },
-  { d:+100, m:'卖糖果赚了 ¥100' },
-  { d:-120, m:'缴纳甜品税，支付 ¥120' },
-  { d:-100, m:'乱丢糖纸被罚 ¥100' },
-  { d:-150, m:'吃多了看牙医，支付 ¥150' },
-  { go0:true, m:'好运！直接前进到起点，并领 ¥300' },
-  { jail:true, m:'太困了，去休息站睡一觉，暂停一回合' },
-];
-
-const players = [
-  { name:'红兔', token:'🐰', money:START_MONEY, pos:0, props:[], skip:false, dead:false },
-  { name:'蓝猫', token:'🐱', money:START_MONEY, pos:0, props:[], skip:false, dead:false },
-];
-const owners = {};   // idx -> 玩家序号
-const levels = {};   // idx -> 升级等级 0~4
-let current = 0, busy = false;
+let players = [], owners = {}, levels = {};
+let current = 0, busy = false, numPlayers = 2, started = false;
 const logs = [];
-const spin = [{x:-20,y:20},{x:-20,y:20}];   // 两个骰子累计旋转
+const spin = [{x:-20,y:20},{x:-20,y:20}];
+let boardBuilt = false, actionGen = null;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const $ = id => document.getElementById(id);
 const baseRent = idx => Math.round(BOARD[idx].price * 0.5);
 const rentOf = idx => Math.round(baseRent(idx) * RENT_MULT[levels[idx] || 0]);
 const upCost = idx => Math.round(BOARD[idx].price * 0.4);
+const aliveCount = () => players.filter(p => !p.dead).length;
 
-function addLog(msg) {
-  logs.unshift(msg);
-  if (logs.length > 25) logs.pop();
-  $('log').innerHTML = logs.map(l => `<p>${l}</p>`).join('');
-}
+function addLog(msg) { logs.unshift(msg); if (logs.length > 25) logs.pop();
+  $('log').innerHTML = logs.map(l => `<p>${l}</p>`).join(''); }
 
-// ===== 立体骰子构建 =====
+/* ---- 立体骰子 ---- */
 const PIP_MAP = { 1:[5], 2:[1,9], 3:[1,5,9], 4:[1,3,7,9], 5:[1,3,5,7,9], 6:[1,3,4,6,7,9] };
-const FACE_DEF = [
-  { n:1, rot:'rotateY(0deg)' }, { n:6, rot:'rotateY(180deg)' },
-  { n:3, rot:'rotateY(90deg)' }, { n:4, rot:'rotateY(-90deg)' },
-  { n:2, rot:'rotateX(90deg)' }, { n:5, rot:'rotateX(-90deg)' },
-];
+const FACE_DEF = [ {n:1,rot:'rotateY(0deg)'},{n:6,rot:'rotateY(180deg)'},{n:3,rot:'rotateY(90deg)'},
+  {n:4,rot:'rotateY(-90deg)'},{n:2,rot:'rotateX(90deg)'},{n:5,rot:'rotateX(-90deg)'} ];
 const FACE_ROT = { 1:[0,0], 2:[-90,0], 3:[0,-90], 4:[0,90], 5:[90,0], 6:[0,-180] };
-
 function buildDie(i) {
-  const die = document.createElement('div');
-  die.className = 'die3d'; die.id = 'die' + i;
-  FACE_DEF.forEach(f => {
-    const face = document.createElement('div');
-    face.className = 'face';
+  const die = document.createElement('div'); die.className = 'die3d'; die.id = 'die' + i;
+  FACE_DEF.forEach(f => { const face = document.createElement('div'); face.className = 'face';
     face.style.transform = f.rot + ' translateZ(35px)';
-    for (let p = 1; p <= 9; p++) {
-      const cell = document.createElement('div');
+    for (let p = 1; p <= 9; p++) { const cell = document.createElement('div');
       if (PIP_MAP[f.n].includes(p)) { const d = document.createElement('div'); d.className = 'pip'; cell.appendChild(d); }
-      face.appendChild(cell);
-    }
-    die.appendChild(face);
-  });
+      face.appendChild(cell); }
+    die.appendChild(face); });
   return die;
 }
-
-function spinDie(i, value) {
-  const [fx, fy] = FACE_ROT[value];
-  // 在当前角度上多转几圈再停到目标面，保证向前滚动
+function spinDie(i, value) { const [fx, fy] = FACE_ROT[value];
   spin[i].x += 360 * 2 + ((fx - (spin[i].x % 360) + 360) % 360);
   spin[i].y += 360 * 2 + ((fy - (spin[i].y % 360) + 360) % 360);
-  $('die' + i).style.transform = `rotateX(${spin[i].x}deg) rotateY(${spin[i].y}deg)`;
-}
+  $('die' + i).style.transform = `rotateX(${spin[i].x}deg) rotateY(${spin[i].y}deg)`; }
 
-// ===== 渲染 =====
+/* ---- 渲染 ---- */
 function buildBoard() {
-  const board = $('board');
-  board.innerHTML = '';
+  const board = $('board'); board.innerHTML = '';
   BOARD.forEach((tile, i) => {
-    const c = document.createElement('div');
-    c.id = 'cell' + i;
-    const [r, col] = GRID_POS[i];
-    c.style.gridRow = r; c.style.gridColumn = col;
-    if (tile.type === 'prop') {
-      c.className = 'cell';
+    const c = document.createElement('div'); c.id = 'cell' + i;
+    const [r, col] = GRID_POS[i]; c.style.gridRow = r; c.style.gridColumn = col;
+    if (tile.type === 'prop') { c.className = 'cell';
       c.innerHTML = `<div class="stripe" style="background:${tile.color}"></div>
-        <div class="nm">${tile.name}</div>
-        <div class="houses" id="h${i}"></div>
-        <div class="pr" id="cellinfo${i}">¥${tile.price}</div>`;
-    } else {
-      c.className = 'cell special ' + (tile.cls || '');
-      c.innerHTML = `<div class="ic">${tile.ic}</div><div class="nm">${tile.name}</div>`;
-    }
+        <div class="nm" id="nm${i}"></div><div class="houses" id="h${i}"></div>
+        <div class="pr" id="cellinfo${i}"></div>`;
+    } else { c.className = 'cell special ' + (tile.cls || '');
+      c.innerHTML = `<div class="ic">${tile.ic}</div><div class="nm" id="nm${i}"></div>`; }
     board.appendChild(c);
   });
-
-  const center = document.createElement('div');
-  center.className = 'center';
-  center.innerHTML = `<div class="bubble" id="bubble">轮到 🐰 红兔</div>
-    <div class="dice-stage" id="diceStage"></div>
-    <div class="sum" id="sum">点击下方按钮掷骰子 🎲</div>`;
+  const center = document.createElement('div'); center.className = 'center';
+  center.innerHTML = `<div class="bubble" id="bubble"></div>
+    <div class="dice-stage" id="diceStage"></div><div class="sum" id="sum"></div>`;
   board.appendChild(center);
-  const stage = center.querySelector('#diceStage');
-  stage.appendChild(buildDie(0));
-  stage.appendChild(buildDie(1));
+  center.querySelector('#diceStage').appendChild(buildDie(0));
+  center.querySelector('#diceStage').appendChild(buildDie(1));
+  boardBuilt = true;
 }
-
-function renderTokens(hopIdx) {
-  document.querySelectorAll('.tokens').forEach(t => t.remove());
+function applyBoardLang() {
+  BOARD.forEach((t, i) => { $('nm' + i).textContent = tileName(t.key); });
+}
+function buildPlayerCards() {
+  const box = $('playersBox'); box.innerHTML = '';
   players.forEach((p, i) => {
-    if (p.dead) return;
-    const cell = $('cell' + p.pos);
-    let box = cell.querySelector('.tokens');
-    if (!box) { box = document.createElement('div'); box.className = 'tokens'; cell.appendChild(box); }
-    const s = document.createElement('span');
-    s.className = 'piece' + (i === hopIdx ? ' hop' : '');
-    s.textContent = p.token;
-    box.appendChild(s);
+    const card = document.createElement('div'); card.className = 'pcard'; card.id = 'pcard' + i;
+    card.style.cssText = `--c:${p.c};--l:${p.l};--d:${p.d}`;
+    card.innerHTML = `<div class="ph">${p.token} <span id="pname${i}"></span></div>
+      <div class="money" id="money${i}">¥${START_MONEY}</div><div class="land" id="land${i}"></div>`;
+    box.appendChild(card);
   });
 }
-
+function renderTokens(hopIdx) {
+  document.querySelectorAll('.tokens').forEach(t => t.remove());
+  players.forEach((p, i) => { if (p.dead) return;
+    const cell = $('cell' + p.pos); let box = cell.querySelector('.tokens');
+    if (!box) { box = document.createElement('div'); box.className = 'tokens'; cell.appendChild(box); }
+    const s = document.createElement('span'); s.className = 'piece' + (i === hopIdx ? ' hop' : '');
+    s.textContent = p.token; box.appendChild(s); });
+}
 function renderStats() {
   players.forEach((p, i) => {
+    $('pname' + i).textContent = pName(i);
     $('money' + i).textContent = '¥' + p.money;
-    $('land' + i).textContent = '地产：' + p.props.length + ' 块';
-    $('pcard' + i).classList.toggle('active', i === current && !p.dead);
+    $('land' + i).textContent = L('landLabel', { n: p.props.length });
+    $('pcard' + i).classList.toggle('active', i === current && !p.dead && started);
+    $('pcard' + i).classList.toggle('dead', p.dead);
   });
   BOARD.forEach((t, i) => {
     if (t.type !== 'prop') return;
-    const cell = $('cell' + i);
-    cell.classList.remove('owned-0', 'owned-1');
-    if (owners[i] !== undefined) {
-      cell.classList.add('owned-' + owners[i]);
-      $('cellinfo' + i).textContent = players[owners[i]].token + '租¥' + rentOf(i);
+    const cell = $('cell' + i), o = owners[i];
+    if (o !== undefined) {
+      cell.style.borderColor = players[o].c;
+      cell.style.boxShadow = `0 0 0 1px ${players[o].c}, 0 2px 0 ${players[o].l}`;
+      $('cellinfo' + i).textContent = players[o].token + '¥' + rentOf(i);
       $('h' + i).textContent = HOUSE_ICON[levels[i] || 0];
     } else {
-      $('cellinfo' + i).textContent = '¥' + t.price;
-      $('h' + i).textContent = '';
+      cell.style.borderColor = '#f3e8ef'; cell.style.boxShadow = '0 2px 0 #f0e2ec';
+      $('cellinfo' + i).textContent = '¥' + t.price; $('h' + i).textContent = '';
     }
   });
-  $('bubble').textContent = '轮到 ' + players[current].token + ' ' + players[current].name;
+  if ($('bubble')) $('bubble').textContent = started ? L('turn', { tok: players[current].token, name: pName(current) }) : '';
 }
 
-// ===== 按钮 =====
-function setActions(buttons) {
-  const a = $('actions'); a.innerHTML = '';
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.textContent = b.text;
-    if (b.cls) btn.className = b.cls;
-    btn.onclick = b.onClick;
-    a.appendChild(btn);
-  });
-}
+/* ---- 按钮 ---- */
+function setActions(gen) { actionGen = gen; const a = $('actions'); a.innerHTML = '';
+  gen().forEach(b => { const btn = document.createElement('button'); btn.className = 'act' + (b.cls ? ' ' + b.cls : '');
+    btn.textContent = b.text; btn.onclick = b.onClick; a.appendChild(btn); }); }
+function refreshActions() { if (actionGen) setActions(actionGen); }
+function nextAliveIdx(from) { let i = from; do { i = (i + 1) % numPlayers; } while (players[i].dead && i !== from); return i; }
+
 function showRollButton() {
   const p = players[current];
-  if (p.skip) {
-    p.skip = false;
-    setActions([{ text: p.token + ' 暂停一回合 ▶', cls:'ghost', onClick: () => { addLog(p.name + ' 休息了一回合'); endTurn(); } }]);
+  if (p.skip) { p.skip = false;
+    setActions(() => [{ text: L('skipTurnBtn', { tok: p.token }), cls:'ghost',
+      onClick: () => { addLog(L('logSkipped', { name: pName(current) })); endTurn(); } }]);
   } else {
-    setActions([{ text: '🎲 ' + p.name + ' 掷骰子', onClick: roll }]);
+    setActions(() => [{ text: L('rollBtn', { name: pName(current) }), onClick: roll }]);
   }
 }
-function showEndButton() {
-  const next = players[1 - current];
-  setActions([{ text: '轮到 ' + next.token + ' ' + next.name + ' ▶', cls:'ghost', onClick: endTurn }]);
-}
+function showEndButton() { const n = nextAliveIdx(current);
+  setActions(() => [{ text: L('nextBtn', { tok: players[n].token, name: pName(n) }), cls:'ghost', onClick: endTurn }]); }
 
-// ===== 金钱 / 破产 =====
+/* ---- 金钱 / 破产 ---- */
 function gain(p, amt) { p.money += amt; }
 function tryPay(payer, amount, creditor) {
-  if (payer.money >= amount) {
-    payer.money -= amount;
-    if (creditor) creditor.money += amount;
-    return false;
-  }
-  if (creditor) creditor.money += payer.money;
-  payer.money = 0; payer.dead = true;
-  return true;
+  if (payer.money >= amount) { payer.money -= amount; if (creditor) creditor.money += amount; return false; }
+  if (creditor) creditor.money += payer.money; payer.money = 0; bankrupt(payer); return true;
 }
+function bankrupt(p) { p.dead = true;
+  addLog(L('logBankrupt', { name: pName(p.i) }));
+  p.props.forEach(idx => { delete owners[idx]; delete levels[idx]; }); p.props = []; }
 function checkGameOver() {
-  const dead = players.find(p => p.dead);
-  if (dead) {
-    const winner = players[1 - players.indexOf(dead)];
-    renderStats(); renderTokens();
-    $('modalTitle').textContent = '🏆 ' + winner.token + ' ' + winner.name + ' 获胜！';
-    $('modalText').textContent = dead.name + ' 破产啦～ ' + winner.name + ' 成了大富翁，恭喜！';
-    $('overlay').classList.add('show');
-    return true;
-  }
+  if (aliveCount() <= 1) { const w = players.find(p => !p.dead);
+    started = false; renderStats(); renderTokens();
+    setTimeout(() => { $('modalTitle').textContent = L('gameOverTitle', { tok: w.token, name: pName(w.i) });
+      $('modalText').textContent = L('gameOverText', { name: pName(w.i) });
+      $('overlay').classList.add('show'); }, 500);
+    return true; }
   return false;
 }
 
-// ===== 掷骰子 + 移动 =====
+/* ---- 掷骰子 + 移动 ---- */
 async function roll() {
-  if (busy) return;
-  busy = true;
-  setActions([{ text: '🎲 掷骰子中…', onClick: () => {} }]);
-  const a = Math.floor(Math.random()*6) + 1;
-  const b = Math.floor(Math.random()*6) + 1;
+  if (busy) return; busy = true;
+  setActions(() => [{ text: L('rolling'), onClick: () => {} }]);
+  const a = Math.floor(Math.random()*6) + 1, b = Math.floor(Math.random()*6) + 1;
   spinDie(0, a); spinDie(1, b);
   const steps = a + b;
-  $('sum').textContent = players[current].name + ' 掷出 ' + a + ' + ' + b + ' = ';
-  $('sum').innerHTML = players[current].name + ' 掷出 ' + a + ' + ' + b + ' = <b>' + steps + '</b>';
-  addLog('🎲 ' + players[current].name + ' 掷出 ' + steps + ' 点');
-  await sleep(1150);
-  await move(steps);
-  busy = false;
+  $('sum').innerHTML = pName(current) + ' : ' + a + ' + ' + b + ' = <b>' + steps + '</b>';
+  addLog(L('logRoll', { name: pName(current), n: steps }));
+  await sleep(1150); await move(steps); busy = false;
 }
-
 async function move(steps) {
   const p = players[current];
   for (let i = 0; i < steps; i++) {
     p.pos = (p.pos + 1) % BOARD.length;
-    if (p.pos === 0) { gain(p, SALARY); addLog('💰 ' + p.name + ' 经过起点，领 ¥' + SALARY); }
-    renderTokens(current);
-    await sleep(180);
+    if (p.pos === 0) { gain(p, SALARY); addLog(L('logSalary', { name: pName(current), s: SALARY })); }
+    renderTokens(current); await sleep(180);
   }
-  renderStats();
-  await resolveTile();
+  renderStats(); await resolveTile();
 }
 
-// ===== 落格处理 =====
 async function resolveTile() {
-  const p = players[current];
-  const idx = p.pos;
-  const tile = BOARD[idx];
-
+  const p = players[current], idx = p.pos, tile = BOARD[idx];
   if (tile.type === 'prop') {
     const owner = owners[idx];
     if (owner === undefined) {
       if (p.money >= tile.price) {
-        setActions([
-          { text:'买下 ¥' + tile.price, cls:'green', onClick: () => {
+        setActions(() => [
+          { text: L('buyBtn', { price: tile.price }), cls:'green', onClick: () => {
               p.money -= tile.price; owners[idx] = current; levels[idx] = 0; p.props.push(idx);
-              addLog('🏘️ ' + p.name + ' 买下了 ' + tile.name + '（¥' + tile.price + '）');
-              renderStats(); showEndButton();
-          }},
-          { text:'暂不购买', cls:'ghost', onClick: () => { addLog(p.name + ' 没买 ' + tile.name); showEndButton(); }},
-        ]);
-        return;
+              addLog(L('logBuy', { name: pName(current), tile: tileName(tile.key), price: tile.price }));
+              renderStats(); showEndButton(); } },
+          { text: L('noBuyBtn'), cls:'ghost', onClick: showEndButton },
+        ]); return;
       }
-      addLog(p.name + ' 来到 ' + tile.name + '，但钱不够买');
+      addLog(L('logNoMoney', { name: pName(current), tile: tileName(tile.key) }));
     } else if (owner === current) {
       const lv = levels[idx] || 0;
       if (lv < 4 && p.money >= upCost(idx)) {
-        const nextName = lv < 3 ? '盖第' + (lv+1) + '栋房' : '升级为旅馆';
-        setActions([
-          { text:'🔨 ' + nextName + ' ¥' + upCost(idx), cls:'green', onClick: () => {
+        setActions(() => [
+          { text: lv < 3 ? L('buildHouse', { n: lv + 1, cost: upCost(idx) }) : L('buildHotel', { cost: upCost(idx) }),
+            cls:'green', onClick: () => {
               p.money -= upCost(idx); levels[idx] = lv + 1;
-              addLog('🔨 ' + p.name + ' 把 ' + tile.name + ' 升到 ' + (lv+1) + ' 级，租金涨到 ¥' + rentOf(idx));
-              renderStats(); showEndButton();
-          }},
-          { text:'暂不升级', cls:'ghost', onClick: showEndButton },
-        ]);
-        return;
+              addLog(L('logUpgrade', { name: pName(current), tile: tileName(tile.key), lv: lv + 1, r: rentOf(idx) }));
+              renderStats(); showEndButton(); } },
+          { text: L('noBuild'), cls:'ghost', onClick: showEndButton },
+        ]); return;
       }
-      addLog(p.name + ' 回到自己的 ' + tile.name + (lv === 4 ? '（已是旅馆）' : ''));
+      addLog((lv === 4 ? L('logOwnHotel') : L('logOwn')).replace('{name}', pName(current)).replace('{tile}', tileName(tile.key)));
     } else {
-      const r = rentOf(idx);
-      const broke = tryPay(p, r, players[owner]);
-      addLog('💸 ' + p.name + ' 付给 ' + players[owner].name + ' 过路费 ¥' + r);
-      renderStats();
-      if (broke) { checkGameOver(); return; }
+      const r = rentOf(idx); const broke = tryPay(p, r, players[owner]);
+      addLog(L('logRent', { name: pName(current), owner: pName(owner), r }));
+      renderStats(); if (broke && checkGameOver()) return;
     }
   } else if (tile.type === 'chance' || tile.type === 'fate') {
-    const e = CHANCES[Math.floor(Math.random()*CHANCES.length)];
-    addLog((tile.type === 'fate' ? '🎲 命运：' : '🍀 机会：') + e.m);
+    const ci = Math.floor(Math.random()*CHANCES.length), e = CHANCES[ci];
+    addLog((tile.type === 'fate' ? L('fatePre') : L('chancePre')) + fmt(STR[lang].chances[ci], { s: SALARY }));
     if (e.go0) { p.pos = 0; gain(p, SALARY); renderTokens(current); }
     else if (e.jail) { p.skip = true; }
     else if (e.d > 0) { gain(p, e.d); }
-    else { const broke = tryPay(p, -e.d, null); renderStats(); if (broke) { checkGameOver(); return; } }
+    else { const broke = tryPay(p, -e.d, null); renderStats(); if (broke && checkGameOver()) return; }
     renderStats();
-  } else if (tile.type === 'jail') {
-    p.skip = true;
-    addLog('😴 ' + p.name + ' 在休息站，下回合暂停');
-  } else if (tile.type === 'bonus') {
-    gain(p, 200); addLog('🎁 ' + p.name + ' 领取福利 ¥200'); renderStats();
-  } else if (tile.type === 'start') {
-    addLog('🏠 ' + p.name + ' 停在起点');
-  }
-  renderStats();
-  showEndButton();
+  } else if (tile.type === 'jail') { p.skip = true; addLog(L('logRest', { name: pName(current) }));
+  } else if (tile.type === 'bonus') { gain(p, 200); addLog(L('logBonus', { name: pName(current), b: 200 })); renderStats();
+  } else if (tile.type === 'start') { addLog(L('logStart', { name: pName(current) })); }
+  renderStats(); showEndButton();
 }
 
-function endTurn() { current = 1 - current; renderStats(); showRollButton(); }
+function endTurn() { current = nextAliveIdx(current); renderStats(); showRollButton(); }
 
-// ===== 启动 =====
+/* ---- 启动 / 语言 ---- */
+function startGame(n) {
+  numPlayers = n;
+  players = META.slice(0, n).map((m, i) => ({ ...m, i, money: START_MONEY, pos: 0, props: [], skip: false, dead: false }));
+  for (const k in owners) delete owners[k]; for (const k in levels) delete levels[k];
+  current = 0; started = true; logs.length = 0;
+  buildPlayerCards();
+  $('setup').classList.remove('show');
+  renderStats(); renderTokens();
+  addLog(L('startMsg', { name: pName(0) }));
+  showRollButton();
+}
+
+function applyLang() {
+  localStorage.setItem('mz_lang', lang);
+  document.documentElement.lang = lang;
+  document.title = STR[lang].titlePlain;
+  $('h1').textContent = L('title');
+  $('setupTitle').textContent = L('setupTitle');
+  $('setupSub').textContent = L('setupSub');
+  $('againBtn').textContent = L('againBtn');
+  document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  if (boardBuilt) applyBoardLang();
+  if (started) { renderStats(); refreshActions(); }
+}
+function setLang(l) { lang = l; applyLang(); }
+
 buildBoard();
-renderStats();
-renderTokens();
-addLog('游戏开始！🐰 红兔先手，点击下方按钮掷骰子～');
-showRollButton();
+applyLang();
+$('setup').classList.add('show');
 </script>
 </body>
 </html>

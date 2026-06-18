@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cute Reversi</title>
+<title>Cute Reversi — Free Two-Player Othello</title>
+<meta name="description" content="Play Cute Reversi (Othello) free online with a friend on one screen. An 8×8 two-player strategy game of traps and big comebacks. No download — phone, tablet and desktop.">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -106,7 +107,7 @@
   <div class="topbar">
     <h1 id="h1">🎀 Cute Reversi 🎀</h1>
     <div class="langbar">
-      <button data-lang="en" onclick="setLang('en')">EN</button>
+      <button data-lang="en" onclick="setLang('en')" class="on">EN</button>
       <button data-lang="zh" onclick="setLang('zh')">中</button>
       <button data-lang="es" onclick="setLang('es')">ES</button>
     </div>
@@ -114,16 +115,16 @@
   <div class="game">
     <div class="left"><div class="board" id="board"></div></div>
     <div class="right">
-      <div class="bubble" id="bubble"></div>
+      <div class="bubble" id="bubble">Turn: 🐰 Rabbit</div>
       <div class="players">
-        <div class="pcard p0 active" id="pcard0"><div class="dot r"></div><div class="nm" id="nm0"></div><div class="score" id="score0">2</div></div>
-        <div class="pcard p1" id="pcard1"><div class="dot b"></div><div class="nm" id="nm1"></div><div class="score" id="score1">2</div></div>
+        <div class="pcard p0 active" id="pcard0"><div class="dot r"></div><div class="nm" id="nm0">🐰 Rabbit</div><div class="score" id="score0">2</div></div>
+        <div class="pcard p1" id="pcard1"><div class="dot b"></div><div class="nm" id="nm1">🐱 Cat</div><div class="score" id="score1">2</div></div>
       </div>
-      <div class="tip" id="tip"></div>
-      <div class="actions"><button class="act" id="restartBtn" onclick="restart()"></button></div>
+      <div class="tip" id="tip">🎯 <b>How to play</b>: place a stone so it <b>traps</b> the opponent's stones (row, column, or diagonal); trapped stones <b>flip to your color</b>.<br>Blinking dots show your moves.<br>No move = auto skip.<br>When the board is full, <b>more stones wins</b>! 🏆<br><br>The winner of a round goes first next round.</div>
+      <div class="actions"><button class="act" id="restartBtn" onclick="restart()">🔄 Restart</button></div>
     </div>
   </div>
-  <div class="about"><h2 id="aboutTitle"></h2><div id="aboutBody"></div></div>
+  <div class="about"><h2 id="aboutTitle">About Cute Reversi</h2><div id="aboutBody"><p><b>Cute Reversi</b> (also known as Othello) is a two-player strategy game of traps and dramatic comebacks, played on an 8×8 board.</p><p>Place a stone to <b>trap</b> your opponent's stones between two of yours, and they flip to your color. When the board is full, whoever has more stones wins. The lead can swing right up to the final move — every game is full of surprises. Play with a friend on one screen — phone, tablet or computer — free, no download.</p></div></div>
 </div>
 <aside class="ad-rail right">📢 Ad<br>(right)</aside>
 </div>
@@ -131,14 +132,14 @@
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2 id="modalTitle"></h2><p id="modalText"></p>
-    <button onclick="restart()" id="againBtn"></button>
+    <button onclick="restart()" id="againBtn">🎀 Play again</button>
   </div>
 </div>
 
 <script>
 "use strict";
 const STR = {
-  en: { title:'🎀 Cute Reversi 🎀', titlePlain:'Cute Reversi',
+  en: { title:'🎀 Cute Reversi 🎀', titlePlain:'Cute Reversi — Free Two-Player Othello',
     turn:'Turn: {tok} {name}', gameEnd:'🎉 Game over',
     pass:'{ptok} {pname} has no move, skipped! Turn: {tok} {name}',
     restartBtn:'🔄 Restart', againBtn:'🎀 Play again',
@@ -148,7 +149,7 @@ const STR = {
     aboutTitle:'About Cute Reversi',
     aboutBody:'<p><b>Cute Reversi</b> (also known as Othello) is a two-player strategy game of traps and dramatic comebacks, played on an 8×8 board.</p><p>Place a stone to <b>trap</b> your opponent\'s stones between two of yours, and they flip to your color. When the board is full, whoever has more stones wins. The lead can swing right up to the final move — every game is full of surprises. Play with a friend on one screen — phone, tablet or computer — free, no download.</p>',
     tip:'🎯 <b>How to play</b>: place a stone so it <b>traps</b> the opponent\'s stones (row, column, or diagonal); trapped stones <b>flip to your color</b>.<br>Blinking dots show your moves.<br>No move = auto skip.<br>When the board is full, <b>more stones wins</b>! 🏆<br><br>The winner of a round goes first next round.' },
-  zh: { title:'🎀 萌萌黑白棋 🎀', titlePlain:'萌萌黑白棋',
+  zh: { title:'🎀 萌萌黑白棋 🎀', titlePlain:'萌萌黑白棋 — 免费在线双人奥赛罗',
     turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束',
     pass:'{ptok} {pname} 没处下，跳过！轮到 {tok} {name}',
     restartBtn:'🔄 重新开始', againBtn:'🎀 再来一局',
@@ -158,7 +159,7 @@ const STR = {
     aboutTitle:'关于萌萌黑白棋',
     aboutBody:'<p><b>黑白棋</b>（又叫奥赛罗 Othello）是经典的双人策略棋，在 8×8 棋盘上对弈，以"大逆转"著称。</p><p>把棋子下在能<b>夹住</b>对方棋子的位置，被夹住的就翻成你的颜色。棋盘填满后，棋子多的人获胜。局势常常到最后一步还能翻盘，每局都有惊喜。和朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
     tip:'🎯 <b>玩法</b>：把棋子下在能<b>夹住</b>对方棋子的位置<br>（横、竖、斜都行），被夹住的就<b>翻成你的颜色</b>。<br>闪烁的小点是你能下的地方。<br>没处可下就自动跳过。<br>棋盘满了，<b>棋子多的人赢</b>！🏆<br><br>上一局赢的人，下一局先手～' },
-  es: { title:'🎀 Reversi Lindo 🎀', titlePlain:'Reversi Lindo',
+  es: { title:'🎀 Reversi Lindo 🎀', titlePlain:'Reversi Lindo — Othello para Dos',
     turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego',
     pass:'{ptok} {pname} no puede mover, ¡salta! Turno: {tok} {name}',
     restartBtn:'🔄 Reiniciar', againBtn:'🎀 Jugar otra vez',

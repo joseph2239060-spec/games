@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cute Gomoku</title>
+<title>Cute Gomoku — Free Two-Player Five in a Row</title>
+<meta name="description" content="Play Cute Gomoku (Five in a Row) free online with a friend on one screen. A classic 15×15 two-player strategy game. No download — works on phone, tablet and desktop.">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
@@ -116,7 +117,7 @@
   <div class="topbar">
     <h1 id="h1">🎀 Cute Gomoku 🎀</h1>
     <div class="langbar">
-      <button data-lang="en" onclick="setLang('en')">EN</button>
+      <button data-lang="en" onclick="setLang('en')" class="on">EN</button>
       <button data-lang="zh" onclick="setLang('zh')">中</button>
       <button data-lang="es" onclick="setLang('es')">ES</button>
     </div>
@@ -124,23 +125,23 @@
   <div class="game">
     <div class="left"><div class="board" id="board"></div></div>
     <div class="right">
-      <div class="bubble" id="bubble"></div>
+      <div class="bubble" id="bubble">Turn: 🐰 Rabbit</div>
       <div class="players">
         <div class="pcard p0 active" id="pcard0">
-          <div class="dot r"></div><div class="nm" id="nm0"></div><div class="cnt" id="cnt0"></div>
+          <div class="dot r"></div><div class="nm" id="nm0">🐰 Rabbit</div><div class="cnt" id="cnt0">Placed: 0</div>
         </div>
         <div class="pcard p1" id="pcard1">
-          <div class="dot b"></div><div class="nm" id="nm1"></div><div class="cnt" id="cnt1"></div>
+          <div class="dot b"></div><div class="nm" id="nm1">🐱 Cat</div><div class="cnt" id="cnt1">Placed: 0</div>
         </div>
       </div>
-      <div class="tip" id="tip"></div>
+      <div class="tip" id="tip">🎯 <b>How to play</b>: take turns placing a stone.<br>First to line up <b>5 of your own stones</b><br>(row, column, or diagonal) wins!<br><br>🏆 The winner of a round goes first next round.<br>(Rabbit 🐰 starts the first game.)</div>
       <div class="actions">
-        <button class="act ghost" id="undoBtn" onclick="undo()"></button>
-        <button class="act" id="restartBtn" onclick="restart()"></button>
+        <button class="act ghost" id="undoBtn" onclick="undo()">↩️ Undo</button>
+        <button class="act" id="restartBtn" onclick="restart()">🔄 Restart</button>
       </div>
     </div>
   </div>
-  <div class="about"><h2 id="aboutTitle"></h2><div id="aboutBody"></div></div>
+  <div class="about"><h2 id="aboutTitle">About Cute Gomoku</h2><div id="aboutBody"><p><b>Cute Gomoku</b> (also called Five in a Row) is a classic two-player strategy game played on a 15×15 board.</p><p>Players take turns placing one stone each. The first to line up <b>five of their own stones</b> in a row — horizontally, vertically, or diagonally — wins. Easy to learn, full of tactics. Play with a friend on one screen — phone, tablet or computer — free and no download.</p></div></div>
 </div>
 <aside class="ad-rail right">📢 Ad<br>(right)</aside>
 </div>
@@ -149,14 +150,14 @@
   <div class="modal">
     <h2 id="modalTitle"></h2>
     <p id="modalText"></p>
-    <button onclick="restart()" id="againBtn"></button>
+    <button onclick="restart()" id="againBtn">🎀 Play again</button>
   </div>
 </div>
 
 <script>
 "use strict";
 const STR = {
-  en: { title:'🎀 Cute Gomoku 🎀', titlePlain:'Cute Gomoku',
+  en: { title:'🎀 Cute Gomoku 🎀', titlePlain:'Cute Gomoku — Free Two-Player Five in a Row',
     turn:'Turn: {tok} {name}', gameEnd:'🎉 Game over', cnt:'Placed: {n}',
     undoBtn:'↩️ Undo', restartBtn:'🔄 Restart', againBtn:'🎀 Play again',
     winTitle:'🏆 {tok} {name} wins!', winText:'Five in a row — awesome!',
@@ -165,7 +166,7 @@ const STR = {
     aboutTitle:'About Cute Gomoku',
     aboutBody:'<p><b>Cute Gomoku</b> (also called Five in a Row) is a classic two-player strategy game played on a 15×15 board.</p><p>Players take turns placing one stone each. The first to line up <b>five of their own stones</b> in a row — horizontally, vertically, or diagonally — wins. Easy to learn, full of tactics. Play with a friend on one screen — phone, tablet or computer — free and no download.</p>',
     tip:'🎯 <b>How to play</b>: take turns placing a stone.<br>First to line up <b>5 of your own stones</b><br>(row, column, or diagonal) wins!<br><br>🏆 The winner of a round goes first next round.<br>(Rabbit 🐰 starts the first game.)' },
-  zh: { title:'🎀 萌萌五子棋 🎀', titlePlain:'萌萌五子棋',
+  zh: { title:'🎀 萌萌五子棋 🎀', titlePlain:'萌萌五子棋 — 免费在线双人五子棋',
     turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束', cnt:'已落子 {n}',
     undoBtn:'↩️ 悔棋', restartBtn:'🔄 重新开始', againBtn:'🎀 再来一局',
     winTitle:'🏆 {tok} {name} 获胜！', winText:'五子连珠，太厉害啦～',
@@ -174,7 +175,7 @@ const STR = {
     aboutTitle:'关于萌萌五子棋',
     aboutBody:'<p><b>五子棋</b>是经典的双人策略棋，在 15×15 的棋盘上对弈。</p><p>两人轮流落子，谁先把<b>五颗自己的棋子连成一条线</b>（横、竖或斜）就获胜。规则简单，却很考策略。和朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
     tip:'🎯 <b>玩法</b>：两人轮流在棋盘上放棋子，<br>谁先把 <b>5 颗自己的棋子连成一条线</b><br>（横、竖、或斜），谁就赢啦！<br><br>🏆 上一局赢的人，下一局先手！<br>（第一局 🐰 兔兔先手）' },
-  es: { title:'🎀 Gomoku Lindo 🎀', titlePlain:'Gomoku Lindo',
+  es: { title:'🎀 Gomoku Lindo 🎀', titlePlain:'Gomoku Lindo — Cinco en Línea para Dos',
     turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego', cnt:'Fichas: {n}',
     undoBtn:'↩️ Deshacer', restartBtn:'🔄 Reiniciar', againBtn:'🎀 Jugar otra vez',
     winTitle:'🏆 ¡{tok} {name} gana!', winText:'¡Cinco en línea — genial!',

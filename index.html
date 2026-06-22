@@ -109,6 +109,16 @@
           <div class="desc" id="d_rev">Trap to flip the board; most stones wins — full of big comebacks!</div>
           <div class="play playword">Play</div>
         </a>
+        <a class="card" href="井字棋.html">
+          <div class="icon">#️⃣</div><div class="name" id="n_ttt">Cute Tic-Tac-Toe</div>
+          <div class="desc" id="d_ttt">The classic 3×3 game — get three in a row to win. Quick and fun!</div>
+          <div class="play playword">Play</div>
+        </a>
+        <a class="card" href="点格棋.html">
+          <div class="icon">📦</div><div class="name" id="n_dab">Cute Dots &amp; Boxes</div>
+          <div class="desc" id="d_dab">Draw lines, close boxes, claim the most to win — sneaky strategy!</div>
+          <div class="play playword">Play</div>
+        </a>
       </div>
     </section>
 
@@ -128,10 +138,12 @@ const STR = {
     catCute:'Cute Games', catCuteDesc:'Charming, candy-colored two-player games.',
     moreSoon:'✨ More game series coming soon — classic, puzzle, casual and more.',
     play:'Play', foot:'Free to play · No download · Phone, tablet & desktop',
-    metaDesc:'Free online mini-games to play with a friend in your browser. Cute two-player board games: Monopoly, Gomoku, Reversi. No download.',
+    metaDesc:'Free online mini-games to play with a friend in your browser. Cute two-player board games: Monopoly, Gomoku, Reversi, Tic-Tac-Toe, Dots and Boxes. No download.',
     n_mono:'Cute Monopoly', d_mono:'Roll dice, buy lands and build houses — bankrupt your rivals! 2–4 players.',
     n_gomo:'Cute Gomoku', d_gomo:'Take turns placing stones — first to line up five in a row wins!',
-    n_rev:'Cute Reversi', d_rev:'Trap to flip the board; most stones wins — full of big comebacks!' },
+    n_rev:'Cute Reversi', d_rev:'Trap to flip the board; most stones wins — full of big comebacks!',
+    n_ttt:'Cute Tic-Tac-Toe', d_ttt:'The classic 3×3 game — get three in a row to win. Quick and fun!',
+    n_dab:'Cute Dots & Boxes', d_dab:'Draw lines, close boxes, claim the most to win — sneaky strategy!' },
   zh: { brand:'KTStar games', titlePlain:'KTStar games — 免费在线小游戏',
     heroTitle:'和朋友一起，打开浏览器就能玩',
     tagline:'免费在线小游戏，和朋友一起玩——免下载，手机、平板、电脑都能玩。',
@@ -141,7 +153,9 @@ const STR = {
     metaDesc:'免费在线小游戏，和朋友一起在浏览器里玩。可爱风双人棋类：大富翁、五子棋、黑白棋，免下载。',
     n_mono:'萌萌大富翁', d_mono:'掷骰子买地、盖房，让对手破产！2–4 人。',
     n_gomo:'萌萌五子棋', d_gomo:'轮流落子，谁先把五颗连成一条线谁就赢！',
-    n_rev:'萌萌黑白棋', d_rev:'夹住对方就翻面，棋子多者赢，常常大逆转！' },
+    n_rev:'萌萌黑白棋', d_rev:'夹住对方就翻面，棋子多者赢，常常大逆转！',
+    n_ttt:'萌萌井字棋', d_ttt:'经典 3×3 棋——谁先三子连线谁就赢，快又好玩！',
+    n_dab:'萌萌点格棋', d_dab:'画线封格子，占得多者赢——暗藏小策略！' },
   es: { brand:'KTStar games', titlePlain:'KTStar games — Juegos Gratis Online',
     heroTitle:'Juega con un amigo, en tu navegador',
     tagline:'Minijuegos gratis online para jugar con un amigo — sin descargas, en móvil, tablet y PC.',
@@ -151,7 +165,9 @@ const STR = {
     metaDesc:'Minijuegos gratis online para jugar con un amigo en el navegador. Juegos lindos para dos: Monopoly, Gomoku, Reversi. Sin descargas.',
     n_mono:'Monopoly Lindo', d_mono:'Tira dados, compra terrenos y construye casas. ¡Haz quebrar a tus rivales! 2–4 jugadores.',
     n_gomo:'Gomoku Lindo', d_gomo:'Por turnos coloca fichas — ¡el primero en alinear cinco gana!',
-    n_rev:'Reversi Lindo', d_rev:'Atrapa para voltear el tablero; gana quien tenga más fichas. ¡Grandes remontadas!' }
+    n_rev:'Reversi Lindo', d_rev:'Atrapa para voltear el tablero; gana quien tenga más fichas. ¡Grandes remontadas!',
+    n_ttt:'Tres en Raya Lindo', d_ttt:'El clásico 3×3 — alinea tres para ganar. ¡Rápido y divertido!',
+    n_dab:'Puntos y Cajas Lindo', d_dab:'Dibuja líneas, cierra cajas, gana quien tenga más. ¡Pura estrategia!' }
 };
 let lang = localStorage.getItem('mz_lang') || 'en';
 const $ = id => document.getElementById(id);
@@ -165,6 +181,8 @@ function applyLang() {
   $('n_mono').textContent = s.n_mono; $('d_mono').textContent = s.d_mono;
   $('n_gomo').textContent = s.n_gomo; $('d_gomo').textContent = s.d_gomo;
   $('n_rev').textContent = s.n_rev; $('d_rev').textContent = s.d_rev;
+  $('n_ttt').textContent = s.n_ttt; $('d_ttt').textContent = s.d_ttt;
+  $('n_dab').textContent = s.n_dab; $('d_dab').textContent = s.d_dab;
   document.querySelectorAll('.playword').forEach(el => el.textContent = s.play);
   document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
 }

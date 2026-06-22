@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cute Dots and Boxes — Free Two-Player Game</title>
+<meta name="description" content="Play Cute Dots and Boxes free online with a friend on one screen. Draw lines, close boxes, claim the most to win. A classic two-player strategy game — no download, works on phone, tablet and desktop.">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; font-family:"PingFang SC","Microsoft YaHei","Heiti SC",sans-serif;
+    background:linear-gradient(165deg,#fff1f6 0%,#e9f7ff 55%,#f3f0ff 100%); color:#5a4a6a; min-height:100vh; padding:14px; overflow-x:hidden; }
+  .page { display:flex; justify-content:center; align-items:flex-start; gap:22px; }
+  .wrap { flex:0 1 1120px; min-width:0; }
+  .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 14px; }
+  h1 { text-align:center; font-size:28px; margin:0; letter-spacing:4px; color:#ff6fa5; font-weight:900; text-shadow:0 2px 6px rgba(255,111,165,.2); }
+  .langbar { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:4px; }
+  .langbar button { border:2px solid #ffd0e3; background:#fff; color:#ff6fa5; font-weight:800; font-size:12px; padding:5px 9px; border-radius:11px; cursor:pointer; font-family:inherit; }
+  .langbar button.on { background:#ff6fa5; color:#fff; border-color:#ff6fa5; }
+
+  .game { display:flex; gap:24px; align-items:stretch; }
+  .left { flex:2; min-width:0; display:flex; align-items:flex-start; justify-content:center; }
+  .right { flex:1; min-width:300px; display:flex; flex-direction:column; gap:16px; }
+  @media (max-width: 820px) { .game { flex-direction:column; } .right { min-width:0; } }
+
+  .board { position:relative; width:100%; max-width:420px; aspect-ratio:1/1; margin:0 auto;
+    background:linear-gradient(160deg,#ffeccb,#f5d6a8); padding:30px; border-radius:24px;
+    border:5px solid #ffd6a0; box-shadow:0 8px 22px rgba(210,150,90,.3), inset 0 0 0 2px #f0c896; }
+  .grid { position:relative; width:100%; height:100%; }
+  .dot { position:absolute; width:11px; height:11px; border-radius:50%; background:#c79a5e;
+    transform:translate(-50%,-50%); z-index:4; pointer-events:none; box-shadow:0 1px 2px rgba(120,80,30,.4); }
+  .edge { position:absolute; z-index:3; cursor:pointer; display:flex; }
+  .edge.h { transform:translateY(-50%); height:18px; align-items:center; }
+  .edge.v { transform:translateX(-50%); width:18px; justify-content:center; }
+  .edge .line { border-radius:5px; background:#f1d8b4; transition:background .12s; }
+  .edge.h .line { width:100%; height:6px; }
+  .edge.v .line { height:100%; width:6px; }
+  .edge:not(.drawn):hover .line { background:#ffb8d6; }
+  .edge.drawn { cursor:default; }
+  .edge.p0 .line { background:#ff6fa5; box-shadow:0 0 5px rgba(255,111,165,.5); }
+  .edge.p1 .line { background:#56b4ff; box-shadow:0 0 5px rgba(86,180,255,.5); }
+  .box { position:absolute; z-index:2; pointer-events:none; }
+  .box .fill { position:absolute; inset:15%; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; opacity:0; transform:scale(.4); transition:opacity .2s, transform .2s; }
+  .box.p0 .fill { background:rgba(255,111,165,.22); opacity:1; transform:scale(1); }
+  .box.p1 .fill { background:rgba(86,180,255,.22); opacity:1; transform:scale(1); }
+
+  .bubble { background:#fff; border:3px solid #ffd0e3; color:#ff6fa5; font-weight:900; font-size:19px; padding:12px 18px; border-radius:20px; box-shadow:0 4px 0 #ffd0e3; text-align:center; }
+  .players { display:flex; gap:12px; }
+  .pcard { flex:1; border-radius:18px; padding:12px; border:3px solid #fff; text-align:center; box-shadow:0 4px 0 rgba(150,120,150,.15); transition:transform .15s; }
+  .pcard.p0 { background:linear-gradient(160deg,#fff0f6,#ffe0ec); }
+  .pcard.p1 { background:linear-gradient(160deg,#eef6ff,#dcecff); }
+  .pcard.active { transform:translateY(-3px) scale(1.03); }
+  .pcard.p0.active { border-color:#ff6b9d; box-shadow:0 0 0 2px #ff6b9d,0 6px 0 #ffc9dd; }
+  .pcard.p1.active { border-color:#56b4ff; box-shadow:0 0 0 2px #56b4ff,0 6px 0 #c2e1ff; }
+  .pcard .dot2 { width:34px; height:34px; border-radius:50%; margin:0 auto 6px; }
+  .pcard .dot2.r { background:radial-gradient(circle at 35% 30%, #ffd6e6,#ff6fa5 58%,#e34d86); box-shadow:inset 0 -3px 4px rgba(180,50,100,.4),inset 0 3px 4px rgba(255,255,255,.6);}
+  .pcard .dot2.b { background:radial-gradient(circle at 35% 30%, #d4ecff,#56b4ff 58%,#2f8fe6); box-shadow:inset 0 -3px 4px rgba(40,110,180,.4),inset 0 3px 4px rgba(255,255,255,.6);}
+  .pcard .nm { font-weight:900; font-size:16px; }
+  .pcard .cnt { font-size:12px; color:#9a8aaa; margin-top:2px; }
+  .tip { background:#fff; border:3px solid #ffe1ee; border-radius:16px; padding:12px 14px; font-size:14px; line-height:1.7; color:#9a8aaa; flex:1; }
+  .tip b { color:#ff6fa5; }
+  .actions { display:flex; gap:12px; }
+  button.act { flex:1; border:none; border-radius:18px; padding:15px; font-size:17px; font-weight:900; font-family:inherit; color:#fff; background:linear-gradient(180deg,#ff9ec6,#ff6fa5); box-shadow:0 5px 0 #e34d86; cursor:pointer; transition:transform .08s,box-shadow .08s; }
+  button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #e34d86; }
+  button.act.ghost { background:linear-gradient(180deg,#cfd8ff,#9fb2f5); box-shadow:0 5px 0 #6f86d8; }
+  .about { margin:24px 0 0; background:#fff; border:3px solid #ffe1ee; border-radius:18px; padding:18px 22px; color:#7a6a8a; line-height:1.8; font-size:14.5px; }
+  .about h2 { margin:0 0 8px; font-size:18px; color:#ff6fa5; } .about p { margin:0 0 8px; } .about b { color:#ff6fa5; }
+  .ad-rail { flex:0 0 160px; height:600px; position:sticky; top:14px; background:repeating-linear-gradient(45deg,#fff6fb,#fff6fb 12px,#fdeef6 12px,#fdeef6 24px); border:2px dashed #ffc2da; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#d99ab8; font-weight:800; font-size:14px; text-align:center; padding:10px; }
+  @media (max-width: 1520px) { .ad-rail { display:none; } }
+  .overlay { position:fixed; inset:0; background:rgba(90,60,90,.45); display:none; align-items:center; justify-content:center; z-index:10; }
+  .overlay.show { display:flex; }
+  .modal { background:#fff; border:4px solid #ffd0e3; border-radius:26px; padding:30px 28px; text-align:center; max-width:320px; box-shadow:0 14px 40px rgba(255,120,170,.4); }
+  .modal h2 { margin:0 0 10px; font-size:28px; color:#ff6fa5; } .modal p { margin:0 0 20px; font-size:15px; color:#9a8aaa; }
+  .modal button { width:100%; border:none; border-radius:18px; padding:15px; font-size:17px; font-weight:900; font-family:inherit; color:#fff; background:linear-gradient(180deg,#ff9ec6,#ff6fa5); box-shadow:0 5px 0 #e34d86; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="page">
+<aside class="ad-rail left">📢 Ad<br>(left)</aside>
+<div class="wrap">
+  <div class="topbar">
+    <h1 id="h1">🎀 Cute Dots &amp; Boxes 🎀</h1>
+    <div class="langbar">
+      <button data-lang="en" onclick="setLang('en')" class="on">EN</button>
+      <button data-lang="zh" onclick="setLang('zh')">中</button>
+      <button data-lang="es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+  <div class="game">
+    <div class="left"><div class="board"><div class="grid" id="grid"></div></div></div>
+    <div class="right">
+      <div class="bubble" id="bubble">Turn: 🐰 Rabbit</div>
+      <div class="players">
+        <div class="pcard p0 active" id="pcard0"><div class="dot2 r"></div><div class="nm" id="nm0">🐰 Rabbit</div><div class="cnt" id="cnt0">Boxes: 0</div></div>
+        <div class="pcard p1" id="pcard1"><div class="dot2 b"></div><div class="nm" id="nm1">🐱 Cat</div><div class="cnt" id="cnt1">Boxes: 0</div></div>
+      </div>
+      <div class="tip" id="tip"></div>
+      <div class="actions">
+        <button class="act ghost" id="undoBtn" onclick="undo()">↩️ Undo</button>
+        <button class="act" id="restartBtn" onclick="restart()">🔄 Restart</button>
+      </div>
+    </div>
+  </div>
+  <div class="about"><h2 id="aboutTitle">About Cute Dots and Boxes</h2><div id="aboutBody"></div></div>
+</div>
+<aside class="ad-rail right">📢 Ad<br>(right)</aside>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal"><h2 id="modalTitle"></h2><p id="modalText"></p><button onclick="restart()" id="againBtn">🎀 Play again</button></div>
+</div>
+
+<script>
+"use strict";
+const STR = {
+  en: { title:'🎀 Cute Dots &amp; Boxes 🎀', titlePlain:'Cute Dots and Boxes — Free Two-Player Game',
+    turn:'Turn: {tok} {name}', gameEnd:'🎉 Game over', cnt:'Boxes: {n}',
+    undoBtn:'↩️ Undo', restartBtn:'🔄 Restart', againBtn:'🎀 Play again',
+    winTitle:'🏆 {tok} {name} wins!', winText:'Most boxes — well played!',
+    drawTitle:'🤝 Draw', drawText:'Same number of boxes — it\'s a tie!',
+    names:['Rabbit','Cat'], aboutTitle:'About Cute Dots and Boxes',
+    aboutBody:'<p><b>Cute Dots and Boxes</b> is a classic two-player strategy game played on a grid of dots.</p><p>Take turns drawing one line between two side-by-side dots. Whoever draws the <b>fourth side of a box</b> claims it and takes another turn. When every box is claimed, the player with the most boxes wins. Easy to learn, surprisingly tactical. Play with a friend on one screen — phone, tablet or computer — free and no download.</p>',
+    tip:'🎯 <b>How to play</b>: take turns drawing one line<br>between two dots. Close the <b>4th side of a box</b><br>to claim it — and go again!<br><br>Most boxes wins. 🏆 The winner goes first next round.<br>Tip: try not to draw the 3rd side of a box.' },
+  zh: { title:'🎀 萌萌点格棋 🎀', titlePlain:'萌萌点格棋 — 免费在线双人点格棋',
+    turn:'轮到 {tok} {name}', gameEnd:'🎉 游戏结束', cnt:'格子 {n}',
+    undoBtn:'↩️ 悔棋', restartBtn:'🔄 重新开始', againBtn:'🎀 再来一局',
+    winTitle:'🏆 {tok} {name} 获胜！', winText:'抢到最多格子，厉害～',
+    drawTitle:'🤝 平局', drawText:'格子一样多，平局啦～',
+    names:['兔兔','猫猫'], aboutTitle:'关于萌萌点格棋',
+    aboutBody:'<p><b>点格棋</b>是经典的双人策略游戏，在一片点阵上对弈。</p><p>两人轮流在相邻两点之间画一条线。谁画上某个格子的<b>第四条边</b>，就占下这个格子，并可以<b>再走一步</b>。所有格子被占完后，占得格子最多的人获胜。规则简单，却很考策略。和朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
+    tip:'🎯 <b>玩法</b>：两人轮流在两点之间画一条线，<br>谁封上某个格子的<b>第四条边</b>就占下它，<br>而且能<b>再走一步</b>！<br><br>格子多的人赢。🏆 赢家下一局先手。<br>小技巧：尽量别画某个格子的第三条边。' },
+  es: { title:'🎀 Puntos y Cajas Lindo 🎀', titlePlain:'Puntos y Cajas Lindo — Juego Gratis para Dos',
+    turn:'Turno: {tok} {name}', gameEnd:'🎉 Fin del juego', cnt:'Cajas: {n}',
+    undoBtn:'↩️ Deshacer', restartBtn:'🔄 Reiniciar', againBtn:'🎀 Jugar otra vez',
+    winTitle:'🏆 ¡{tok} {name} gana!', winText:'¡Más cajas — bien jugado!',
+    drawTitle:'🤝 Empate', drawText:'Mismo número de cajas — ¡empate!',
+    names:['Conejo','Gato'], aboutTitle:'Sobre Puntos y Cajas Lindo',
+    aboutBody:'<p><b>Puntos y Cajas</b> es un clásico juego de estrategia para dos en una cuadrícula de puntos.</p><p>Por turnos dibuja una línea entre dos puntos vecinos. Quien dibuje el <b>cuarto lado de una caja</b> la gana y juega otra vez. Cuando todas las cajas están tomadas, gana quien tenga más. Fácil de aprender y muy táctico. Juega con un amigo en la misma pantalla — móvil, tablet u ordenador — gratis y sin descargas.</p>',
+    tip:'🎯 <b>Cómo jugar</b>: por turnos dibuja una línea<br>entre dos puntos. Cierra el <b>4º lado de una caja</b><br>para ganarla — ¡y juega otra vez!<br><br>Gana quien tenga más cajas. 🏆 El ganador empieza la siguiente.<br>Consejo: evita dibujar el 3er lado de una caja.' }
+};
+let lang = localStorage.getItem('mz_lang') || 'en';
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o && o[k] !== undefined) ? o[k] : '');
+const L = (k, o) => fmt(STR[lang][k], o);
+const pName = i => STR[lang].names[i];
+
+const N = 4, STEP = 100 / N, TOTAL = N * N;
+const P = [ { token:'🐰', cls:'p0' }, { token:'🐱', cls:'p1' } ];
+let H, V, boxes, current, over, scores, history, lastWinner = null;
+const $ = id => document.getElementById(id);
+const p = i => i * STEP;
+
+function build() {
+  const g = $('grid'); g.innerHTML = '';
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const b = document.createElement('div'); b.className = 'box'; b.id = 'bx_' + r + '_' + c;
+    b.style.left = p(c) + '%'; b.style.top = p(r) + '%'; b.style.width = STEP + '%'; b.style.height = STEP + '%';
+    const f = document.createElement('div'); f.className = 'fill'; b.appendChild(f); g.appendChild(b);
+  }
+  for (let r = 0; r <= N; r++) for (let c = 0; c < N; c++) {
+    const e = document.createElement('div'); e.className = 'edge h'; e.id = 'h_' + r + '_' + c;
+    e.style.left = p(c) + '%'; e.style.top = p(r) + '%'; e.style.width = STEP + '%';
+    const ln = document.createElement('div'); ln.className = 'line'; e.appendChild(ln);
+    e.onclick = () => draw('h', r, c); g.appendChild(e);
+  }
+  for (let r = 0; r < N; r++) for (let c = 0; c <= N; c++) {
+    const e = document.createElement('div'); e.className = 'edge v'; e.id = 'v_' + r + '_' + c;
+    e.style.left = p(c) + '%'; e.style.top = p(r) + '%'; e.style.height = STEP + '%';
+    const ln = document.createElement('div'); ln.className = 'line'; e.appendChild(ln);
+    e.onclick = () => draw('v', r, c); g.appendChild(e);
+  }
+  for (let r = 0; r <= N; r++) for (let c = 0; c <= N; c++) {
+    const d = document.createElement('div'); d.className = 'dot'; d.style.left = p(c) + '%'; d.style.top = p(r) + '%'; g.appendChild(d);
+  }
+}
+function reset() {
+  H = Array.from({ length: N + 1 }, () => Array(N).fill(-1));
+  V = Array.from({ length: N }, () => Array(N + 1).fill(-1));
+  boxes = Array.from({ length: N }, () => Array(N).fill(-1));
+  current = (lastWinner === null) ? 0 : lastWinner; over = false; scores = [0, 0]; history = [];
+  $('overlay').classList.remove('show'); render(); updatePanel();
+}
+function boxComplete(br, bc) { return H[br][bc] >= 0 && H[br + 1][bc] >= 0 && V[br][bc] >= 0 && V[br][bc + 1] >= 0; }
+function snapshot() { return JSON.stringify({ H, V, boxes, current, scores }); }
+function restore(s) { const o = JSON.parse(s); H = o.H; V = o.V; boxes = o.boxes; current = o.current; scores = o.scores; }
+function render() {
+  for (let r = 0; r <= N; r++) for (let c = 0; c < N; c++) {
+    const e = $('h_' + r + '_' + c); e.className = 'edge h' + (H[r][c] >= 0 ? ' drawn p' + H[r][c] : '');
+  }
+  for (let r = 0; r < N; r++) for (let c = 0; c <= N; c++) {
+    const e = $('v_' + r + '_' + c); e.className = 'edge v' + (V[r][c] >= 0 ? ' drawn p' + V[r][c] : '');
+  }
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const b = $('bx_' + r + '_' + c); const v = boxes[r][c];
+    b.className = 'box' + (v >= 0 ? ' p' + v : ''); b.querySelector('.fill').textContent = v >= 0 ? P[v].token : '';
+  }
+}
+function draw(type, r, c) {
+  if (over) return;
+  const arr = type === 'h' ? H : V;
+  if (arr[r][c] >= 0) return;
+  history.push(snapshot());
+  arr[r][c] = current;
+  let gained = false;
+  const cand = type === 'h' ? [[r - 1, c], [r, c]] : [[r, c - 1], [r, c]];
+  for (const [br, bc] of cand) {
+    if (br >= 0 && br < N && bc >= 0 && bc < N && boxes[br][bc] < 0 && boxComplete(br, bc)) {
+      boxes[br][bc] = current; scores[current]++; gained = true;
+    }
+  }
+  if (!gained) current = 1 - current;
+  render();
+  if (scores[0] + scores[1] === TOTAL) finish(); else updatePanel();
+}
+function finish() {
+  over = true; let title, text;
+  if (scores[0] > scores[1]) { lastWinner = 0; title = L('winTitle', { tok: P[0].token, name: pName(0) }); text = L('winText'); }
+  else if (scores[1] > scores[0]) { lastWinner = 1; title = L('winTitle', { tok: P[1].token, name: pName(1) }); text = L('winText'); }
+  else { title = L('drawTitle'); text = L('drawText'); }
+  updatePanel();
+  setTimeout(() => { $('modalTitle').textContent = title; $('modalText').textContent = text; $('overlay').classList.add('show'); }, 350);
+}
+function undo() {
+  if (over || history.length === 0) return;
+  restore(history.pop()); render(); updatePanel();
+}
+function updatePanel() {
+  $('bubble').textContent = over ? L('gameEnd') : L('turn', { tok: P[current].token, name: pName(current) });
+  $('cnt0').textContent = L('cnt', { n: scores[0] }); $('cnt1').textContent = L('cnt', { n: scores[1] });
+  $('nm0').textContent = P[0].token + ' ' + pName(0); $('nm1').textContent = P[1].token + ' ' + pName(1);
+  $('pcard0').classList.toggle('active', current === 0 && !over);
+  $('pcard1').classList.toggle('active', current === 1 && !over);
+  $('undoBtn').disabled = history.length === 0 || over;
+}
+function restart() { reset(); }
+function applyLang() {
+  localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
+  document.title = STR[lang].titlePlain;
+  $('h1').innerHTML = L('title'); $('tip').innerHTML = L('tip');
+  $('aboutTitle').textContent = L('aboutTitle'); $('aboutBody').innerHTML = L('aboutBody');
+  $('undoBtn').textContent = L('undoBtn'); $('restartBtn').textContent = L('restartBtn'); $('againBtn').textContent = L('againBtn');
+  document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  updatePanel();
+}
+function setLang(l) { lang = l; applyLang(); }
+build(); reset(); applyLang();
+</script>
+</body>
+</html>

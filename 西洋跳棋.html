@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classic Checkers — Free Two-Player Game</title>
+<meta name="description" content="Play Classic Checkers (Draughts) free online with a friend on one screen. Jump, chain captures, crown Kings and clear the board. A timeless two-player strategy game — no download, works on phone, tablet and desktop.">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; font-family: Georgia, "Times New Roman", "Songti SC", "PingFang SC", serif;
+    background:linear-gradient(165deg,#f4ebd9 0%,#e8d6ba 100%); color:#5a4632; min-height:100vh; padding:14px; overflow-x:hidden; }
+  .page { display:flex; justify-content:center; align-items:flex-start; gap:22px; }
+  .wrap { flex:0 1 1120px; min-width:0; }
+  .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 16px; }
+  h1 { text-align:center; font-size:27px; margin:0; letter-spacing:2px; color:#6b4a26; font-weight:700; }
+  .langbar { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:4px; }
+  .langbar button { border:1.5px solid #d8c3a0; background:#fbf4e7; color:#7c4f27; font-weight:700; font-size:12px; padding:5px 9px; border-radius:8px; cursor:pointer; font-family:inherit; }
+  .langbar button.on { background:#7c4f27; color:#f7eede; border-color:#7c4f27; }
+
+  .game { display:flex; gap:24px; align-items:stretch; }
+  .left { flex:2; min-width:0; display:flex; align-items:flex-start; justify-content:center; }
+  .right { flex:1; min-width:300px; display:flex; flex-direction:column; gap:16px; }
+  @media (max-width: 820px) { .game { flex-direction:column; } .right { min-width:0; } }
+
+  .board { display:grid; grid-template-columns:repeat(8,1fr); aspect-ratio:1/1; width:100%; max-width:520px; margin:0 auto;
+    border:13px solid #5e3d1f; border-radius:6px; overflow:hidden; background:#5e3d1f;
+    box-shadow:0 10px 28px rgba(60,40,20,.45), inset 0 0 0 2px #3f2913; }
+  .sq { position:relative; }
+  .sq.light { background:#ead0a6; background-image:linear-gradient(135deg,#efd9b3,#e3c594); }
+  .sq.dark { background:#9c6a38; background-image:linear-gradient(135deg,#a87a45,#8d5e2f); cursor:pointer; }
+  .sq.sel { box-shadow: inset 0 0 0 4px #d4af4f; }
+  .dot { position:absolute; inset:35%; border-radius:50%; background:rgba(212,175,79,.75); box-shadow:0 0 0 2px rgba(212,175,79,.35); }
+  .pc { position:absolute; inset:13%; border-radius:50%; font-size:clamp(13px,3.6vw,26px);
+    display:flex; align-items:center; justify-content:center; }
+  .pc.p0 { background:radial-gradient(circle at 36% 30%, #fdf8ea, #ecdcbd 58%, #cdb98e);
+    box-shadow:0 2px 4px rgba(80,50,20,.4), inset 0 -3px 6px rgba(150,120,70,.45), inset 0 3px 6px rgba(255,255,255,.75); }
+  .pc.p1 { background:radial-gradient(circle at 36% 30%, #e2906f, #c0432e 58%, #8d2a1c);
+    box-shadow:0 2px 4px rgba(80,20,10,.45), inset 0 -3px 6px rgba(120,30,20,.5), inset 0 3px 6px rgba(255,205,185,.55); }
+  .pc.king::after { content:'\265A'; color:#e7c45e; text-shadow:0 1px 2px rgba(60,30,0,.55); line-height:1; }
+  .pc.p0.king::after { color:#b98a2e; }
+  .pc.win { box-shadow:0 0 0 3px #e7c45e, 0 0 14px #e7c45e; }
+
+  .bubble { background:#fbf4e7; border:2px solid #d8c3a0; color:#6b4a26; font-weight:700; font-size:19px; padding:12px 18px; border-radius:12px; box-shadow:0 3px 0 #d8c3a0; text-align:center; }
+  .players { display:flex; gap:12px; }
+  .pcard { flex:1; border-radius:12px; padding:12px; border:2px solid #e6d6b8; text-align:center; background:#fbf4e7; box-shadow:0 3px 0 rgba(140,110,70,.18); transition:transform .15s; }
+  .pcard.active { transform:translateY(-3px) scale(1.03); }
+  .pcard.p0.active { border-color:#caa24b; box-shadow:0 0 0 2px #caa24b,0 5px 0 #e3d3ad; }
+  .pcard.p1.active { border-color:#c0432e; box-shadow:0 0 0 2px #c0432e,0 5px 0 #e8c2b6; }
+  .pcard .dot2 { width:32px; height:32px; border-radius:50%; margin:0 auto 6px; }
+  .pcard .dot2.p0 { background:radial-gradient(circle at 36% 30%, #fdf8ea,#ecdcbd 58%,#cdb98e); box-shadow:inset 0 -2px 4px rgba(150,120,70,.45),inset 0 2px 4px rgba(255,255,255,.7);}
+  .pcard .dot2.p1 { background:radial-gradient(circle at 36% 30%, #e2906f,#c0432e 58%,#8d2a1c); box-shadow:inset 0 -2px 4px rgba(120,30,20,.5),inset 0 2px 4px rgba(255,205,185,.55);}
+  .pcard .nm { font-weight:700; font-size:16px; color:#5a4632; }
+  .pcard .cnt { font-size:12px; color:#9a8568; margin-top:2px; }
+  .tip { background:#fbf4e7; border:2px solid #e2d3b4; border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.7; color:#6b5640; flex:1; }
+  .tip b { color:#8a5a2b; }
+  .actions { display:flex; gap:12px; }
+  button.act { flex:1; border:none; border-radius:12px; padding:15px; font-size:17px; font-weight:700; font-family:inherit; color:#f7eede; background:linear-gradient(180deg,#9a6a36,#7c4f27); box-shadow:0 5px 0 #5e3d1f; cursor:pointer; transition:transform .08s,box-shadow .08s; }
+  button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #5e3d1f; }
+  button.act.ghost { background:linear-gradient(180deg,#c0a06f,#a07f52); box-shadow:0 5px 0 #7c5f38; }
+  .about { margin:24px 0 0; background:#fbf4e7; border:2px solid #e2d3b4; border-radius:14px; padding:18px 22px; color:#6b5640; line-height:1.8; font-size:14.5px; }
+  .about h2 { margin:0 0 8px; font-size:18px; color:#8a5a2b; } .about p { margin:0 0 8px; } .about b { color:#8a5a2b; }
+  .ad-rail { flex:0 0 160px; height:600px; position:sticky; top:14px; background:repeating-linear-gradient(45deg,#f6efe0,#f6efe0 12px,#efe4cd 12px,#efe4cd 24px); border:2px dashed #d8c3a0; border-radius:14px; display:flex; align-items:center; justify-content:center; color:#b59c70; font-weight:700; font-size:14px; text-align:center; padding:10px; }
+  @media (max-width: 1520px) { .ad-rail { display:none; } }
+  .overlay { position:fixed; inset:0; background:rgba(60,40,20,.5); display:none; align-items:center; justify-content:center; z-index:10; }
+  .overlay.show { display:flex; }
+  .modal { background:#fbf4e7; border:3px solid #d4af4f; border-radius:18px; padding:30px 28px; text-align:center; max-width:320px; box-shadow:0 14px 40px rgba(60,40,20,.4); }
+  .modal h2 { margin:0 0 10px; font-size:27px; color:#8a5a2b; } .modal p { margin:0 0 20px; font-size:15px; color:#6b5640; }
+  .modal button { width:100%; border:none; border-radius:12px; padding:15px; font-size:17px; font-weight:700; font-family:inherit; color:#f7eede; background:linear-gradient(180deg,#9a6a36,#7c4f27); box-shadow:0 5px 0 #5e3d1f; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="page">
+<aside class="ad-rail left">📢 Ad<br>(left)</aside>
+<div class="wrap">
+  <div class="topbar">
+    <h1 id="h1">Classic Checkers</h1>
+    <div class="langbar">
+      <button data-lang="en" onclick="setLang('en')" class="on">EN</button>
+      <button data-lang="zh" onclick="setLang('zh')">中</button>
+      <button data-lang="es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+  <div class="game">
+    <div class="left"><div class="board" id="board"></div></div>
+    <div class="right">
+      <div class="bubble" id="bubble">Turn: Ivory</div>
+      <div class="players">
+        <div class="pcard p0 active" id="pcard0"><div class="dot2 p0"></div><div class="nm" id="nm0">Ivory</div><div class="cnt" id="cnt0">Pieces: 12</div></div>
+        <div class="pcard p1" id="pcard1"><div class="dot2 p1"></div><div class="nm" id="nm1">Red</div><div class="cnt" id="cnt1">Pieces: 12</div></div>
+      </div>
+      <div class="tip" id="tip"></div>
+      <div class="actions">
+        <button class="act ghost" id="undoBtn" onclick="undo()">↩️ Undo</button>
+        <button class="act" id="restartBtn" onclick="restart()">🔄 Restart</button>
+      </div>
+    </div>
+  </div>
+  <div class="about"><h2 id="aboutTitle">About Classic Checkers</h2><div id="aboutBody"><p><b>Classic Checkers</b> (also called Draughts) is one of the world's oldest and best-loved two-player board games, played on an 8×8 board using only the dark squares.</p><p><b>How to play:</b> Each player starts with 12 pieces. On your turn, move one piece diagonally forward to an empty dark square. To capture, jump diagonally over an adjacent opponent piece into the empty square beyond — and if the same piece can jump again, you keep jumping in the same turn.</p><p><b>Kings:</b> When one of your pieces reaches the far edge of the board, it is crowned a King. Kings are more powerful because they can move and capture both forward and backward.</p><p><b>How to win:</b> You win by capturing all of your opponent's pieces, or by leaving them with no legal move. The winner of a round goes first in the next.</p><p><b>A little strategy:</b> Hold your back row early to stop your opponent from crowning Kings, fight for the centre, and trade pieces when you are ahead. Behind its simple rules lies deep strategy studied for centuries. Play with a friend on one screen — phone, tablet or computer — free and no download.</p></div></div>
+</div>
+<aside class="ad-rail right">📢 Ad<br>(right)</aside>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal"><h2 id="modalTitle"></h2><p id="modalText"></p><button onclick="restart()" id="againBtn">Play again</button></div>
+</div>
+
+<script>
+"use strict";
+const STR = {
+  en: { titlePlain:'Classic Checkers — Free Two-Player Game', h1:'Classic Checkers',
+    turn:'Turn: {name}', gameEnd:'🎉 Game over', cnt:'Pieces: {n}',
+    undoBtn:'↩️ Undo', restartBtn:'🔄 Restart', againBtn:'Play again',
+    winTitle:'🏆 {name} wins!', winText:'The board is won — well played!',
+    names:['Ivory','Red'], aboutTitle:'About Classic Checkers',
+    aboutBody:'<p><b>Classic Checkers</b> (also called Draughts) is one of the world\'s oldest and best-loved two-player board games, played on an 8×8 board using only the dark squares.</p><p><b>How to play:</b> Each player starts with 12 pieces. On your turn, move one piece diagonally forward to an empty dark square. To capture, jump diagonally over an adjacent opponent piece into the empty square beyond — and if the same piece can jump again, you keep jumping in the same turn.</p><p><b>Kings:</b> When one of your pieces reaches the far edge of the board, it is crowned a King. Kings are more powerful because they can move and capture both forward and backward.</p><p><b>How to win:</b> You win by capturing all of your opponent\'s pieces, or by leaving them with no legal move. The winner of a round goes first in the next.</p><p><b>A little strategy:</b> Hold your back row early to stop your opponent from crowning Kings, fight for the centre, and trade pieces when you are ahead. Behind its simple rules lies deep strategy studied for centuries. Play with a friend on one screen — phone, tablet or computer — free and no download.</p>',
+    tip:'🎯 <b>How to play</b>: tap your piece, then a glowing square.<br>Move diagonally on the dark squares. <b>Jump</b> over an<br>opponent to capture — chain jumps if you can!<br>Reach the far side to crown a <b>King</b> (moves both ways).<br><br>Capture all your opponent\'s pieces to win.<br>🏆 The winner of a round goes first next round.' },
+  zh: { titlePlain:'西洋跳棋 — 免费在线双人跳棋', h1:'西洋跳棋',
+    turn:'轮到 {name}', gameEnd:'🎉 游戏结束', cnt:'棋子 {n}',
+    undoBtn:'↩️ 悔棋', restartBtn:'🔄 重新开始', againBtn:'再来一局',
+    winTitle:'🏆 {name} 获胜！', winText:'清盘获胜，下得漂亮！',
+    names:['白方','红方'], aboutTitle:'关于西洋跳棋',
+    aboutBody:'<p><b>西洋跳棋</b>（又称国际跳棋 / Draughts）是世界上最古老、最受欢迎的双人棋类之一，在 8×8 棋盘上只用深色格对弈。</p><p><b>玩法：</b>每人 12 颗棋子。轮到你时，把一颗棋子沿斜线向前走一格到空的深色格。吃子是斜跳过相邻的对方棋子、落到它后面的空格；如果同一颗棋子还能继续跳，就在同一回合里连跳。</p><p><b>王棋：</b>当你的棋子走到棋盘最远一行，就升为"王"。王更强，因为它可以前后两个方向移动和吃子。</p><p><b>怎么赢：</b>吃光对方所有棋子，或让对方无子可动，你就赢了。上一局赢的人下一局先手。</p><p><b>一点策略：</b>开局别急着动最后一排，挡住对方升王；争夺中心；领先时多换子。规则简单，背后却藏着几百年来被钻研的深度策略。和朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
+    tip:'🎯 <b>玩法</b>：先点自己的棋子，再点发光的格子。<br>在深色格上斜走。斜<b>跳</b>过对方就吃子，<br>能连跳就连跳！走到对面底线升<b>"王"</b>（可前后走）。<br><br>吃光对方棋子即胜。<br>🏆 上一局赢的人，下一局先手。' },
+  es: { titlePlain:'Damas Clásicas — Juego Gratis para Dos', h1:'Damas Clásicas',
+    turn:'Turno: {name}', gameEnd:'🎉 Fin del juego', cnt:'Fichas: {n}',
+    undoBtn:'↩️ Deshacer', restartBtn:'🔄 Reiniciar', againBtn:'Jugar otra vez',
+    winTitle:'🏆 ¡{name} gana!', winText:'¡Tablero ganado — bien jugado!',
+    names:['Marfil','Rojo'], aboutTitle:'Sobre Damas Clásicas',
+    aboutBody:'<p><b>Damas Clásicas</b> (o Draughts) es uno de los juegos de mesa para dos más antiguos y queridos del mundo, jugado en un tablero de 8×8 usando solo las casillas oscuras.</p><p><b>Cómo jugar:</b> Cada jugador empieza con 12 fichas. En tu turno, mueve una ficha en diagonal hacia adelante a una casilla oscura vacía. Para capturar, salta en diagonal sobre una ficha rival hacia la casilla vacía siguiente — y si la misma ficha puede seguir saltando, continúa en el mismo turno.</p><p><b>Damas (reyes):</b> Cuando una de tus fichas llega al extremo opuesto, es coronada como Dama. Las Damas son más poderosas porque pueden mover y capturar hacia adelante y hacia atrás.</p><p><b>Cómo ganar:</b> Ganas capturando todas las fichas del rival, o dejándolo sin movimientos legales. El ganador de una ronda empieza la siguiente.</p><p><b>Algo de estrategia:</b> No muevas tu última fila al principio para evitar que el rival corone Damas, controla el centro y cambia fichas cuando vas ganando. Tras sus reglas simples hay una estrategia profunda estudiada durante siglos. Juega con un amigo en la misma pantalla — móvil, tablet u ordenador — gratis y sin descargas.</p>',
+    tip:'🎯 <b>Cómo jugar</b>: toca tu ficha y luego una casilla brillante.<br>Muévete en diagonal por las casillas oscuras. <b>Salta</b><br>sobre el rival para capturar — ¡encadena saltos!<br>Llega al otro lado para coronar una <b>Dama</b> (ambos sentidos).<br><br>Captura todas las fichas para ganar.<br>🏆 El ganador de una ronda empieza la siguiente.' }
+};
+let lang = localStorage.getItem('mz_lang') || 'en';
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o && o[k] !== undefined) ? o[k] : '');
+const L = (k, o) => fmt(STR[lang][k], o);
+const pName = i => STR[lang].names[i];
+
+let board, current, over, selected, chainPiece, history, lastWinner = null;
+const $ = id => document.getElementById(id);
+const darkCells = {};
+const inB = (r, c) => r >= 0 && r < 8 && c >= 0 && c < 8;
+const dirsFor = pc => pc.k ? [[-1,-1],[-1,1],[1,-1],[1,1]] : (pc.p === 0 ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]]);
+
+function buildBoard() {
+  const el = $('board'); el.innerHTML = '';
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    const sq = document.createElement('div');
+    const dark = (r + c) % 2 === 1;
+    sq.className = 'sq ' + (dark ? 'dark' : 'light');
+    if (dark) { sq.onclick = () => clickSq(r, c); darkCells[r + '_' + c] = sq; }
+    el.appendChild(sq);
+  }
+}
+function initBoard() {
+  board = Array.from({ length: 8 }, () => Array(8).fill(null));
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    if ((r + c) % 2 === 1) {
+      if (r < 3) board[r][c] = { p: 1, k: false };
+      else if (r > 4) board[r][c] = { p: 0, k: false };
+    }
+  }
+}
+function reset() {
+  initBoard(); current = (lastWinner === null) ? 0 : lastWinner;
+  over = false; selected = null; chainPiece = null; history = [];
+  $('overlay').classList.remove('show'); render(); updatePanel();
+}
+function simpleMoves(r, c) {
+  const pc = board[r][c]; if (!pc) return [];
+  const out = [];
+  for (const [dr, dc] of dirsFor(pc)) { const nr = r + dr, nc = c + dc;
+    if (inB(nr, nc) && !board[nr][nc]) out.push({ to: [nr, nc] }); }
+  return out;
+}
+function captureMoves(r, c) {
+  const pc = board[r][c]; if (!pc) return [];
+  const out = [];
+  for (const [dr, dc] of dirsFor(pc)) {
+    const mr = r + dr, mc = c + dc, lr = r + 2*dr, lc = c + 2*dc;
+    if (inB(lr, lc) && !board[lr][lc] && inB(mr, mc) && board[mr][mc] && board[mr][mc].p !== pc.p)
+      out.push({ to: [lr, lc], cap: [mr, mc] });
+  }
+  return out;
+}
+function movesFor(r, c) { return simpleMoves(r, c).concat(captureMoves(r, c)); }
+function hasAnyMove(p) {
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++)
+    if (board[r][c] && board[r][c].p === p && movesFor(r, c).length) return true;
+  return false;
+}
+function countPieces(p) { let n = 0; for (let r=0;r<8;r++) for (let c=0;c<8;c++) if (board[r][c] && board[r][c].p === p) n++; return n; }
+function snapshot() { return JSON.stringify({ board, current, chainPiece }); }
+function restore(s) { const o = JSON.parse(s); board = o.board; current = o.current; chainPiece = o.chainPiece; }
+
+function clickSq(r, c) {
+  if (over) return;
+  if (chainPiece) {
+    const caps = captureMoves(chainPiece[0], chainPiece[1]);
+    const m = caps.find(x => x.to[0] === r && x.to[1] === c);
+    if (m) doMove(chainPiece, m);
+    return;
+  }
+  const cell = board[r][c];
+  if (cell && cell.p === current) { selected = [r, c]; render(); return; }
+  if (selected) {
+    const m = movesFor(selected[0], selected[1]).find(x => x.to[0] === r && x.to[1] === c);
+    if (m) { doMove(selected, m); return; }
+  }
+  selected = null; render();
+}
+function doMove(from, m) {
+  history.push(snapshot());
+  const [fr, fc] = from, [tr, tc] = m.to;
+  const pc = board[fr][fc];
+  board[fr][fc] = null;
+  let captured = false;
+  if (m.cap) { board[m.cap[0]][m.cap[1]] = null; captured = true; }
+  board[tr][tc] = pc;
+  let promoted = false;
+  if (!pc.k && ((pc.p === 0 && tr === 0) || (pc.p === 1 && tr === 7))) { pc.k = true; promoted = true; }
+  if (captured && !promoted && captureMoves(tr, tc).length > 0) {
+    chainPiece = [tr, tc]; selected = [tr, tc]; render(); updatePanel(); return;
+  }
+  chainPiece = null; selected = null; current = 1 - current;
+  render(); updatePanel(); checkEnd();
+}
+function checkEnd() {
+  if (countPieces(current) === 0 || !hasAnyMove(current)) {
+    over = true; lastWinner = 1 - current; render(); updatePanel();
+    setTimeout(() => { $('modalTitle').textContent = L('winTitle', { name: pName(lastWinner) });
+      $('modalText').textContent = L('winText'); $('overlay').classList.add('show'); }, 450);
+  }
+}
+function undo() {
+  if (over || history.length === 0) return;
+  restore(history.pop()); selected = null; render(); updatePanel();
+}
+function render() {
+  for (const k in darkCells) { darkCells[k].innerHTML = ''; darkCells[k].classList.remove('sel'); }
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    const pc = board[r][c]; if (!pc) continue;
+    const d = document.createElement('div'); d.className = 'pc p' + pc.p + (pc.k ? ' king' : '');
+    darkCells[r + '_' + c].appendChild(d);
+  }
+  const sel = chainPiece || selected;
+  if (sel && !over) {
+    const key = sel[0] + '_' + sel[1]; if (darkCells[key]) darkCells[key].classList.add('sel');
+    const dests = chainPiece ? captureMoves(sel[0], sel[1]) : movesFor(sel[0], sel[1]);
+    dests.forEach(m => { const dot = document.createElement('div'); dot.className = 'dot';
+      darkCells[m.to[0] + '_' + m.to[1]].appendChild(dot); });
+  }
+}
+function updatePanel() {
+  $('bubble').textContent = over ? L('gameEnd') : L('turn', { name: pName(current) });
+  $('cnt0').textContent = L('cnt', { n: countPieces(0) }); $('cnt1').textContent = L('cnt', { n: countPieces(1) });
+  $('nm0').textContent = pName(0); $('nm1').textContent = pName(1);
+  $('pcard0').classList.toggle('active', current === 0 && !over);
+  $('pcard1').classList.toggle('active', current === 1 && !over);
+  $('undoBtn').disabled = history.length === 0 || over;
+}
+function restart() { reset(); }
+function applyLang() {
+  localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
+  document.title = STR[lang].titlePlain;
+  $('h1').textContent = L('h1'); $('tip').innerHTML = L('tip');
+  $('aboutTitle').textContent = L('aboutTitle'); $('aboutBody').innerHTML = L('aboutBody');
+  $('undoBtn').textContent = L('undoBtn'); $('restartBtn').textContent = L('restartBtn'); $('againBtn').textContent = L('againBtn');
+  document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  updatePanel();
+}
+function setLang(l) { lang = l; applyLang(); }
+buildBoard(); reset(); applyLang();
+</script>
+</body>
+</html>

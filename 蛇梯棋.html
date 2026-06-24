@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classic Snakes and Ladders — Free 2–4 Player Game</title>
+<meta name="description" content="Play Classic Snakes and Ladders free online with friends or family on one screen. Roll the die, climb ladders, dodge snakes and race to 100. A timeless 2–4 player board game — no download, works on phone, tablet and desktop.">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin:0; font-family: Georgia, "Times New Roman", "Songti SC", "PingFang SC", serif;
+    background:linear-gradient(165deg,#f4ebd9 0%,#e8d6ba 100%); color:#5a4632; min-height:100vh; padding:14px; overflow-x:hidden; }
+  .page { display:flex; justify-content:center; align-items:flex-start; gap:22px; }
+  .wrap { flex:0 1 1120px; min-width:0; }
+  .topbar { display:flex; align-items:center; justify-content:center; position:relative; margin:2px 0 16px; }
+  h1 { text-align:center; font-size:26px; margin:0; letter-spacing:1px; color:#6b4a26; font-weight:700; }
+  .langbar { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:4px; }
+  .langbar button { border:1.5px solid #d8c3a0; background:#fbf4e7; color:#7c4f27; font-weight:700; font-size:12px; padding:5px 9px; border-radius:8px; cursor:pointer; font-family:inherit; }
+  .langbar button.on { background:#7c4f27; color:#f7eede; border-color:#7c4f27; }
+
+  .game { display:flex; gap:24px; align-items:stretch; }
+  .left { flex:2; min-width:0; display:flex; align-items:flex-start; justify-content:center; }
+  .right { flex:1; min-width:300px; display:flex; flex-direction:column; gap:14px; }
+  @media (max-width: 820px) { .game { flex-direction:column; } .right { min-width:0; } }
+
+  .board { display:grid; grid-template-columns:repeat(10,1fr); aspect-ratio:1/1; width:100%; max-width:540px; margin:0 auto;
+    border:12px solid #5e3d1f; border-radius:6px; overflow:hidden; background:#5e3d1f; box-shadow:0 10px 28px rgba(60,40,20,.45); }
+  .cell { position:relative; }
+  .cell.a { background:#ecd2a8; } .cell.b { background:#e1c391; }
+  .cell.ladder { background:#cfe3b0; } .cell.snake { background:#f1c8bb; }
+  .cell .num { position:absolute; top:1px; left:3px; font-size:9px; font-weight:700; color:#7c6647; font-family:Georgia,serif; }
+  .cell .mark { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; opacity:.55; }
+  .cell .toks { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:1px; z-index:2; padding:8px 1px 1px; }
+  .tok { width:10px; height:10px; border-radius:50%; border:1.5px solid rgba(255,255,255,.85); box-shadow:0 1px 2px rgba(0,0,0,.35); }
+  .tok.bump { animation:bump .4s ease; }
+  @keyframes bump { 0%{ transform:scale(.4);} 60%{ transform:scale(1.35);} 100%{ transform:scale(1);} }
+
+  .bubble { background:#fbf4e7; border:2px solid #d8c3a0; color:#6b4a26; font-weight:700; font-size:18px; padding:11px 16px; border-radius:12px; box-shadow:0 3px 0 #d8c3a0; text-align:center; }
+  .rollbox { display:flex; align-items:center; gap:14px; justify-content:center; background:#fbf4e7; border:2px solid #e6d6b8; border-radius:12px; padding:12px; }
+  .die { font-size:56px; line-height:1; color:#5a4632; width:60px; text-align:center; }
+  .rollbox button { border:none; border-radius:12px; padding:14px 18px; font-size:17px; font-weight:700; font-family:inherit; color:#f7eede; background:linear-gradient(180deg,#9a6a36,#7c4f27); box-shadow:0 5px 0 #5e3d1f; cursor:pointer; transition:transform .08s,box-shadow .08s; }
+  .rollbox button:active { transform:translateY(4px); box-shadow:0 1px 0 #5e3d1f; }
+  .rollbox button:disabled { opacity:.5; cursor:default; box-shadow:0 5px 0 #5e3d1f; transform:none; }
+  .msg { min-height:18px; font-size:13px; color:#6b5640; text-align:center; line-height:1.4; }
+  .countsel { display:flex; align-items:center; gap:8px; justify-content:center; font-size:13px; color:#8a7350; }
+  .countsel button { border:1.5px solid #d8c3a0; background:#fbf4e7; color:#7c4f27; font-weight:700; font-size:13px; width:34px; height:30px; border-radius:8px; cursor:pointer; font-family:inherit; }
+  .countsel button.on { background:#7c4f27; color:#f7eede; border-color:#7c4f27; }
+  .players { display:flex; flex-direction:column; gap:8px; }
+  .pcard { display:flex; align-items:center; gap:10px; background:#fbf4e7; border:2px solid #e6d6b8; border-radius:12px; padding:9px 12px; }
+  .pcard.active { border-color:#caa24b; box-shadow:0 0 0 2px #caa24b; }
+  .ptok { width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(0,0,0,.18); flex:none; }
+  .pnm { font-weight:700; color:#5a4632; flex:1; }
+  .ppos { font-size:13px; color:#9a8568; }
+  .tip { background:#fbf4e7; border:2px solid #e2d3b4; border-radius:12px; padding:12px 14px; font-size:13.5px; line-height:1.7; color:#6b5640; }
+  .tip b { color:#8a5a2b; }
+  .actions { display:flex; gap:12px; }
+  button.act { flex:1; border:none; border-radius:12px; padding:14px; font-size:16px; font-weight:700; font-family:inherit; color:#f7eede; background:linear-gradient(180deg,#9a6a36,#7c4f27); box-shadow:0 5px 0 #5e3d1f; cursor:pointer; transition:transform .08s,box-shadow .08s; }
+  button.act:active { transform:translateY(4px); box-shadow:0 1px 0 #5e3d1f; }
+  button.act.ghost { background:linear-gradient(180deg,#c0a06f,#a07f52); box-shadow:0 5px 0 #7c5f38; }
+  button.act:disabled { opacity:.5; }
+  .about { margin:24px 0 0; background:#fbf4e7; border:2px solid #e2d3b4; border-radius:14px; padding:18px 22px; color:#6b5640; line-height:1.8; font-size:14.5px; }
+  .about h2 { margin:0 0 8px; font-size:18px; color:#8a5a2b; } .about p { margin:0 0 8px; } .about b { color:#8a5a2b; }
+  .ad-rail { flex:0 0 160px; height:600px; position:sticky; top:14px; background:repeating-linear-gradient(45deg,#f6efe0,#f6efe0 12px,#efe4cd 12px,#efe4cd 24px); border:2px dashed #d8c3a0; border-radius:14px; display:flex; align-items:center; justify-content:center; color:#b59c70; font-weight:700; font-size:14px; text-align:center; padding:10px; }
+  @media (max-width: 1520px) { .ad-rail { display:none; } }
+  .overlay { position:fixed; inset:0; background:rgba(60,40,20,.5); display:none; align-items:center; justify-content:center; z-index:10; }
+  .overlay.show { display:flex; }
+  .modal { background:#fbf4e7; border:3px solid #d4af4f; border-radius:18px; padding:30px 28px; text-align:center; max-width:320px; box-shadow:0 14px 40px rgba(60,40,20,.4); }
+  .modal h2 { margin:0 0 10px; font-size:26px; color:#8a5a2b; } .modal p { margin:0 0 20px; font-size:15px; color:#6b5640; }
+  .modal button { width:100%; border:none; border-radius:12px; padding:15px; font-size:17px; font-weight:700; font-family:inherit; color:#f7eede; background:linear-gradient(180deg,#9a6a36,#7c4f27); box-shadow:0 5px 0 #5e3d1f; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="page">
+<aside class="ad-rail left">📢 Ad<br>(left)</aside>
+<div class="wrap">
+  <div class="topbar">
+    <h1 id="h1">Classic Snakes and Ladders</h1>
+    <div class="langbar">
+      <button data-lang="en" onclick="setLang('en')" class="on">EN</button>
+      <button data-lang="zh" onclick="setLang('zh')">中</button>
+      <button data-lang="es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+  <div class="game">
+    <div class="left"><div class="board" id="board"></div></div>
+    <div class="right">
+      <div class="bubble" id="bubble">Turn: Red</div>
+      <div class="rollbox"><div class="die" id="die">⚀</div><button id="rollBtn" onclick="roll()">🎲 Roll</button></div>
+      <div class="msg" id="msg"></div>
+      <div class="countsel"><span id="cntLbl">Players</span>
+        <button data-n="2" class="on" onclick="setCount(2)">2</button>
+        <button data-n="3" onclick="setCount(3)">3</button>
+        <button data-n="4" onclick="setCount(4)">4</button>
+      </div>
+      <div class="players" id="players"></div>
+      <div class="tip" id="tip"></div>
+      <div class="actions">
+        <button class="act ghost" id="undoBtn" onclick="undo()">↩️ Undo</button>
+        <button class="act" id="restartBtn" onclick="restart()">🔄 Restart</button>
+      </div>
+    </div>
+  </div>
+  <div class="about"><h2 id="aboutTitle">About Classic Snakes and Ladders</h2><div id="aboutBody"><p><b>Classic Snakes and Ladders</b> is a beloved board game for 2 to 4 players, played on a numbered grid from 1 to 100.</p><p><b>How to play:</b> On your turn, roll the die and move your token forward that many squares. The first player to reach square 100 wins.</p><p><b>Ladders and snakes:</b> If you land on the foot of a ladder, climb up to its top. If you land on the head of a snake, slide back down to its tail. One lucky ladder — or one unlucky snake — can change everything.</p><p><b>A game of chance:</b> Snakes and Ladders is driven entirely by the roll of the die, which makes it perfectly fair and a great first board game for young children — no strategy required, just good luck and a little drama.</p><p><b>Did you know?</b> The game comes from ancient India, where it was called <i>Moksha Patam</i> and used to teach how good deeds (ladders) lift you up while bad ones (snakes) bring you down. Play with friends or family on one screen — phone, tablet or computer — free and no download.</p></div></div>
+</div>
+<aside class="ad-rail right">📢 Ad<br>(right)</aside>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal"><h2 id="modalTitle"></h2><p id="modalText"></p><button onclick="restart()" id="againBtn">Play again</button></div>
+</div>
+
+<script>
+"use strict";
+const STR = {
+  en: { titlePlain:'Classic Snakes and Ladders — Free 2–4 Player Game', h1:'Classic Snakes and Ladders',
+    turn:'Turn: {name}', gameEnd:'🎉 Game over', rollBtn:'🎲 Roll', cntLbl:'Players',
+    undoBtn:'↩️ Undo', restartBtn:'🔄 Restart', againBtn:'Play again',
+    atPos:'square {n}', startPos:'start',
+    moved:'{name} rolled {r} → square {n}', ladder:'{name} climbed a ladder up to {n}! 🪜', snake:'{name} hit a snake down to {n}! 🐍',
+    winTitle:'🏆 {name} wins!', winText:'First to reach 100 — congratulations!',
+    names:['Red','Blue','Green','Yellow'], aboutTitle:'About Classic Snakes and Ladders',
+    aboutBody:'<p><b>Classic Snakes and Ladders</b> is a beloved board game for 2 to 4 players, played on a numbered grid from 1 to 100.</p><p><b>How to play:</b> On your turn, roll the die and move your token forward that many squares. The first player to reach square 100 wins.</p><p><b>Ladders and snakes:</b> If you land on the foot of a ladder, climb up to its top. If you land on the head of a snake, slide back down to its tail. One lucky ladder — or one unlucky snake — can change everything.</p><p><b>A game of chance:</b> Snakes and Ladders is driven entirely by the roll of the die, which makes it perfectly fair and a great first board game for young children — no strategy required, just good luck and a little drama.</p><p><b>Did you know?</b> The game comes from ancient India, where it was called <i>Moksha Patam</i> and used to teach how good deeds (ladders) lift you up while bad ones (snakes) bring you down. Play with friends or family on one screen — phone, tablet or computer — free and no download.</p>',
+    tip:'🎲 <b>How to play</b>: tap Roll and move your token.<br>Land on a 🪜 <b>ladder</b> to climb up, a 🐍 <b>snake</b> to slide down.<br>First to reach <b>100</b> wins!<br><br>2–4 players — pick the number above.' },
+  zh: { titlePlain:'蛇梯棋 — 免费在线 2–4 人蛇梯棋', h1:'蛇梯棋',
+    turn:'轮到 {name}', gameEnd:'🎉 游戏结束', rollBtn:'🎲 掷骰', cntLbl:'人数',
+    undoBtn:'↩️ 悔棋', restartBtn:'🔄 重新开始', againBtn:'再来一局',
+    atPos:'第 {n} 格', startPos:'起点',
+    moved:'{name} 掷出 {r} → 第 {n} 格', ladder:'{name} 爬梯子上到第 {n} 格！🪜', snake:'{name} 踩到蛇滑到第 {n} 格！🐍',
+    winTitle:'🏆 {name} 获胜！', winText:'最先到达 100 格，恭喜！',
+    names:['红方','蓝方','绿方','黄方'], aboutTitle:'关于蛇梯棋',
+    aboutBody:'<p><b>蛇梯棋</b>是 2–4 人都爱玩的经典桌游，在 1 到 100 的方格盘上进行。</p><p><b>玩法：</b>轮到你时掷骰子，按点数向前走。最先到达第 100 格的人获胜。</p><p><b>梯子和蛇：</b>走到梯子底就爬到梯子顶；踩到蛇头就滑回蛇尾。一架幸运的梯子，或一条倒霉的蛇，都可能让局势瞬间逆转。</p><p><b>纯靠运气：</b>蛇梯棋完全由骰子决定，所以非常公平，也是小朋友的绝佳第一款桌游——不需要策略，只要好运气和一点小刺激。</p><p><b>小知识：</b>它源自古印度，原名 <i>Moksha Patam</i>，用来教导"善行（梯子）让人上升、恶行（蛇）让人下坠"。和家人朋友用同一台设备就能玩，手机、平板、电脑都行，免费、免下载。</p>',
+    tip:'🎲 <b>玩法</b>：点"掷骰"走棋。<br>踩到 🪜 <b>梯子</b>往上爬，踩到 🐍 <b>蛇</b>往下滑。<br>最先到达 <b>100</b> 格获胜！<br><br>2–4 人，上方选人数。' },
+  es: { titlePlain:'Serpientes y Escaleras — Juego Gratis 2–4 Jugadores', h1:'Serpientes y Escaleras',
+    turn:'Turno: {name}', gameEnd:'🎉 Fin del juego', rollBtn:'🎲 Tirar', cntLbl:'Jugadores',
+    undoBtn:'↩️ Deshacer', restartBtn:'🔄 Reiniciar', againBtn:'Jugar otra vez',
+    atPos:'casilla {n}', startPos:'salida',
+    moved:'{name} sacó {r} → casilla {n}', ladder:'¡{name} subió por una escalera a {n}! 🪜', snake:'¡{name} cayó por una serpiente a {n}! 🐍',
+    winTitle:'🏆 ¡{name} gana!', winText:'¡El primero en llegar a 100 — felicidades!',
+    names:['Rojo','Azul','Verde','Amarillo'], aboutTitle:'Sobre Serpientes y Escaleras',
+    aboutBody:'<p><b>Serpientes y Escaleras</b> es un querido juego de mesa para 2 a 4 jugadores, en un tablero numerado del 1 al 100.</p><p><b>Cómo jugar:</b> En tu turno, tira el dado y avanza tu ficha esas casillas. El primero en llegar a la casilla 100 gana.</p><p><b>Escaleras y serpientes:</b> Si caes al pie de una escalera, sube hasta arriba. Si caes en la cabeza de una serpiente, baja hasta su cola. Una escalera con suerte — o una serpiente con mala suerte — puede cambiarlo todo.</p><p><b>Un juego de azar:</b> Serpientes y Escaleras depende totalmente del dado, lo que lo hace muy justo y un primer juego de mesa ideal para los más pequeños — sin estrategia, solo suerte y un poco de emoción.</p><p><b>¿Sabías que?</b> Viene de la antigua India, donde se llamaba <i>Moksha Patam</i> y enseñaba que las buenas acciones (escaleras) elevan y las malas (serpientes) hacen caer. Juega con amigos o familia en una pantalla — móvil, tablet u ordenador — gratis y sin descargas.</p>',
+    tip:'🎲 <b>Cómo jugar</b>: pulsa Tirar y mueve tu ficha.<br>Cae en una 🪜 <b>escalera</b> para subir, una 🐍 <b>serpiente</b> para bajar.<br>¡El primero en llegar a <b>100</b> gana!<br><br>2–4 jugadores — elige arriba.' }
+};
+let lang = localStorage.getItem('mz_lang') || 'en';
+const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o && o[k] !== undefined) ? o[k] : '');
+const L = (k, o) => fmt(STR[lang][k], o);
+const pName = i => STR[lang].names[i];
+
+const LADDERS = {1:38,4:14,9:31,21:42,28:84,36:44,51:67,71:91,80:100};
+const SNAKES = {16:6,47:26,49:11,56:53,62:19,64:60,87:24,93:73,95:75,98:78};
+const DIE = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+const COLORS = ['#d9463b','#3b73d9','#2e9e5b','#e0a92e'];
+let numPlayers = 2, pos = [], current, over, rolling, history, lastWinner = null;
+const $ = id => document.getElementById(id);
+const cellEl = {};
+
+function buildBoard() {
+  const el = $('board'); el.innerHTML = '';
+  for (let vr = 0; vr < 10; vr++) for (let vc = 0; vc < 10; vc++) {
+    const boardRow = 9 - vr;
+    const n = (boardRow % 2 === 0) ? boardRow*10 + vc + 1 : boardRow*10 + (9 - vc) + 1;
+    const cell = document.createElement('div');
+    let cls = 'cell ' + (((vr + vc) % 2 === 0) ? 'a' : 'b');
+    if (LADDERS[n]) cls += ' ladder'; else if (SNAKES[n]) cls += ' snake';
+    cell.className = cls;
+    let inner = '<span class="num">' + n + '</span>';
+    if (LADDERS[n]) inner += '<span class="mark">🪜</span>';
+    else if (SNAKES[n]) inner += '<span class="mark">🐍</span>';
+    inner += '<span class="toks" id="toks_' + n + '"></span>';
+    cell.innerHTML = inner; el.appendChild(cell); cellEl[n] = cell;
+  }
+}
+function renderPlayers() {
+  const el = $('players'); el.innerHTML = '';
+  for (let p = 0; p < numPlayers; p++) {
+    const c = document.createElement('div'); c.className = 'pcard'; c.id = 'pc_' + p;
+    c.innerHTML = '<span class="ptok" style="background:' + COLORS[p] + '"></span><span class="pnm" id="pn_' + p + '"></span><span class="ppos" id="pp_' + p + '"></span>';
+    el.appendChild(c);
+  }
+}
+function renderTokens(bumpP) {
+  for (let n = 1; n <= 100; n++) $('toks_' + n).innerHTML = '';
+  for (let p = 0; p < numPlayers; p++) {
+    if (pos[p] >= 1) {
+      const t = document.createElement('span'); t.className = 'tok' + (p === bumpP ? ' bump' : '');
+      t.style.background = COLORS[p]; $('toks_' + pos[p]).appendChild(t);
+    }
+  }
+}
+function snapshot() { return JSON.stringify({ pos, current }); }
+function restore(s) { const o = JSON.parse(s); pos = o.pos; current = o.current; }
+function reset() {
+  pos = Array(numPlayers).fill(0);
+  current = (lastWinner !== null && lastWinner < numPlayers) ? lastWinner : 0;
+  over = false; rolling = false; history = [];
+  $('die').textContent = '⚀'; $('msg').textContent = ''; $('overlay').classList.remove('show');
+  renderPlayers(); renderTokens(-1); updatePanel();
+}
+function roll() {
+  if (over || rolling) return;
+  rolling = true; updatePanel();
+  history.push(snapshot());
+  let ticks = 0;
+  const id = setInterval(() => {
+    $('die').textContent = DIE[Math.floor(Math.random() * 6)];
+    if (++ticks > 8) { clearInterval(id); const r = Math.floor(Math.random() * 6) + 1; $('die').textContent = DIE[r - 1]; resolve(r); }
+  }, 70);
+}
+function resolve(r) {
+  const who = current;
+  let np = pos[who] + r;
+  if (np >= 100) {
+    pos[who] = 100; renderTokens(who); rolling = false; over = true; lastWinner = who; updatePanel();
+    $('msg').textContent = L('moved', { name: pName(who), r: r, n: 100 });
+    setTimeout(() => { $('modalTitle').textContent = L('winTitle', { name: pName(who) });
+      $('modalText').textContent = L('winText'); $('overlay').classList.add('show'); }, 500);
+    return;
+  }
+  pos[who] = np;
+  let msg;
+  if (LADDERS[np]) { pos[who] = LADDERS[np]; msg = L('ladder', { name: pName(who), n: pos[who] }); }
+  else if (SNAKES[np]) { pos[who] = SNAKES[np]; msg = L('snake', { name: pName(who), n: pos[who] }); }
+  else { msg = L('moved', { name: pName(who), r: r, n: np }); }
+  renderTokens(who); $('msg').textContent = msg;
+  current = (current + 1) % numPlayers; rolling = false; updatePanel();
+}
+function undo() {
+  if (over || rolling || history.length === 0) return;
+  restore(history.pop()); renderTokens(-1); $('msg').textContent = ''; updatePanel();
+}
+function setCount(n) { numPlayers = n; lastWinner = null;
+  document.querySelectorAll('.countsel button').forEach(b => b.classList.toggle('on', +b.dataset.n === n));
+  reset(); }
+function updatePanel() {
+  $('bubble').textContent = over ? L('gameEnd') : L('turn', { name: pName(current) });
+  for (let p = 0; p < numPlayers; p++) {
+    $('pn_' + p).textContent = pName(p);
+    $('pp_' + p).textContent = pos[p] >= 1 ? L('atPos', { n: pos[p] }) : L('startPos');
+    $('pc_' + p).classList.toggle('active', p === current && !over);
+  }
+  $('rollBtn').disabled = over || rolling;
+  $('undoBtn').disabled = history.length === 0 || over || rolling;
+}
+function restart() { reset(); }
+function applyLang() {
+  localStorage.setItem('mz_lang', lang); document.documentElement.lang = lang;
+  document.title = STR[lang].titlePlain;
+  $('h1').textContent = L('h1'); $('tip').innerHTML = L('tip');
+  $('aboutTitle').textContent = L('aboutTitle'); $('aboutBody').innerHTML = L('aboutBody');
+  $('rollBtn').textContent = L('rollBtn'); $('cntLbl').textContent = L('cntLbl');
+  $('undoBtn').textContent = L('undoBtn'); $('restartBtn').textContent = L('restartBtn'); $('againBtn').textContent = L('againBtn');
+  document.querySelectorAll('.langbar button').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  updatePanel();
+}
+function setLang(l) { lang = l; applyLang(); }
+buildBoard(); reset(); applyLang();
+</script>
+</body>
+</html>

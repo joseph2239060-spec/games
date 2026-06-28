@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1125079546894245" crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Zodiac Match — Celestial Tile Puzzle</title>
+<meta name="description" content="Zodiac Match is a calming celestial tile puzzle. Tap the stars, match three of the same zodiac sign, and clear the constellation board. Free to play, no download.">
+<style>
+  :root{
+    --bg0:#0a0a1f; --bg1:#141434; --bg2:#1d1b46;
+    --gold:#f4d589; --gold2:#e8b75a; --ink:#eae6ff; --muted:#9d98c7;
+    --tile:#221f4d; --tile2:#2e2a63; --line:#5b54a8;
+    --glow: 0 0 18px rgba(244,213,137,.55);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body{ height:100%; }
+  body{
+    margin:0; font-family:"Cinzel","Trajan Pro","Segoe UI",-apple-system,"PingFang SC",serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #2a2660 0%, rgba(42,38,96,0) 60%),
+      radial-gradient(900px 500px at 80% 110%, #3a2c63 0%, rgba(58,44,99,0) 55%),
+      linear-gradient(160deg, var(--bg0), var(--bg1) 55%, var(--bg2));
+    color:var(--ink); min-height:100vh; overflow-x:hidden;
+  }
+  #stars{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .app{ position:relative; z-index:1; max-width:480px; margin:0 auto; padding:14px 14px 28px; }
+
+  .top{ display:flex; align-items:center; justify-content:space-between; margin:4px 2px 10px; }
+  .title{ display:flex; flex-direction:column; }
+  .title h1{ margin:0; font-size:22px; font-weight:800; letter-spacing:3px;
+    background:linear-gradient(180deg,#fff,#f4d589); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .title .sub{ font-size:10px; letter-spacing:4px; color:var(--muted); margin-top:2px; text-transform:uppercase; }
+  .level{ text-align:right; font-size:11px; letter-spacing:2px; color:var(--muted); }
+  .level b{ display:block; font-size:20px; color:var(--gold); letter-spacing:1px; }
+
+  .hud{ display:flex; gap:10px; margin:0 2px 12px; }
+  .stat{ flex:1; background:rgba(34,31,77,.55); border:1px solid rgba(91,84,168,.5); border-radius:14px;
+    padding:8px 10px; text-align:center; backdrop-filter:blur(4px); }
+  .stat .k{ font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+  .stat .v{ font-size:18px; font-weight:800; color:var(--ink); margin-top:1px; }
+  .stat .v.gold{ color:var(--gold); }
+
+  .progress{ height:6px; border-radius:6px; background:rgba(91,84,168,.25); margin:0 2px 12px; overflow:hidden; }
+  .progress i{ display:block; height:100%; width:0%; border-radius:6px;
+    background:linear-gradient(90deg,var(--gold2),var(--gold)); box-shadow:var(--glow); transition:width .35s; }
+
+  .board{ position:relative; width:100%; height:380px; margin:0 auto;
+    border-radius:20px; border:1px solid rgba(91,84,168,.35);
+    background:radial-gradient(140% 90% at 50% 0%, rgba(58,52,128,.35), rgba(20,20,52,.15));
+    overflow:hidden; }
+  .tile{ position:absolute; width:54px; height:54px; border-radius:13px; cursor:pointer;
+    background:linear-gradient(160deg,var(--tile2),var(--tile));
+    border:1.5px solid rgba(124,116,210,.7);
+    box-shadow:0 4px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .12s, opacity .15s, top .18s, left .18s, box-shadow .15s;
+  }
+  .tile .g{ font-size:30px; line-height:1; color:var(--gold);
+    text-shadow:0 0 10px rgba(244,213,137,.6); font-family:"Segoe UI Symbol","Noto Sans Symbols",sans-serif; }
+  .tile .corner{ position:absolute; width:3px; height:3px; border-radius:50%; background:rgba(244,213,137,.8); box-shadow:0 0 4px rgba(244,213,137,.9); }
+  .tile.free{ }
+  .tile.free:active{ transform:scale(.92); }
+  .tile.blocked{ filter:brightness(.5) saturate(.7); cursor:default; }
+  .tile.blocked .g{ text-shadow:none; }
+  .tile.pop{ animation:pop .22s ease forwards; }
+  @keyframes pop{ 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(0); opacity:0} }
+
+  .tray-wrap{ margin:16px 2px 0; }
+  .tray-label{ font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; text-align:center; margin-bottom:6px; }
+  .tray{ display:flex; gap:6px; justify-content:center; padding:10px; border-radius:16px;
+    background:rgba(20,20,52,.55); border:1px solid rgba(91,84,168,.5); }
+  .slot{ width:42px; height:46px; border-radius:11px; background:rgba(91,84,168,.14);
+    border:1px dashed rgba(124,116,210,.4); display:flex; align-items:center; justify-content:center; }
+  .slot.warn{ border-color:#ff7a9a; background:rgba(255,122,154,.12); }
+  .slot .g{ font-size:24px; color:var(--gold); text-shadow:0 0 8px rgba(244,213,137,.5);
+    font-family:"Segoe UI Symbol","Noto Sans Symbols",sans-serif; animation:drop .18s ease; }
+  @keyframes drop{ from{ transform:translateY(-10px) scale(.7); opacity:0 } to{ transform:none; opacity:1 } }
+
+  .tools{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:16px 2px 0; }
+  .tool{ position:relative; border:1px solid rgba(124,116,210,.55); border-radius:14px; padding:10px 4px 8px;
+    background:linear-gradient(180deg,rgba(46,42,99,.8),rgba(34,31,77,.8)); cursor:pointer; text-align:center;
+    transition:transform .08s, border-color .15s; }
+  .tool:active{ transform:translateY(2px); }
+  .tool:disabled{ opacity:.4; cursor:not-allowed; }
+  .tool .ti{ font-size:20px; } .tool .tn{ display:block; font-size:10px; letter-spacing:1px; color:var(--muted); margin-top:3px; }
+  .tool .ad{ position:absolute; top:-7px; right:-6px; font-size:8px; font-weight:800; letter-spacing:.5px;
+    background:linear-gradient(180deg,#ffc05a,#ff9d2e); color:#3a2400; padding:2px 5px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+
+  .foot{ text-align:center; font-size:10px; letter-spacing:2px; color:var(--muted); margin-top:18px; opacity:.7; }
+
+  .overlay{ position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
+    background:rgba(8,8,24,.72); backdrop-filter:blur(6px); }
+  .overlay.show{ display:flex; }
+  .modal{ width:300px; max-width:86vw; text-align:center; padding:28px 24px; border-radius:24px;
+    background:linear-gradient(165deg,rgba(46,42,99,.96),rgba(20,20,52,.96));
+    border:1px solid rgba(244,213,137,.4); box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08); }
+  .modal .em{ font-size:46px; filter:drop-shadow(0 0 14px rgba(244,213,137,.6)); }
+  .modal h2{ margin:8px 0 4px; font-size:24px; letter-spacing:2px;
+    background:linear-gradient(180deg,#fff,#f4d589); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .modal p{ margin:0 0 18px; font-size:13px; color:var(--muted); line-height:1.6; letter-spacing:.5px; }
+  .btn{ display:block; width:100%; border:none; cursor:pointer; font-family:inherit; font-weight:800; letter-spacing:1.5px;
+    padding:14px; border-radius:14px; font-size:15px; margin-top:10px;
+    color:#2a1c00; background:linear-gradient(180deg,var(--gold),var(--gold2)); box-shadow:0 6px 0 #b8862f; }
+  .btn:active{ transform:translateY(4px); box-shadow:0 2px 0 #b8862f; }
+  .btn.ghost{ color:var(--ink); background:linear-gradient(180deg,rgba(91,84,168,.5),rgba(60,54,120,.5)); box-shadow:0 6px 0 rgba(40,36,90,.8); }
+  .btn .adtag{ font-size:10px; opacity:.85; margin-left:6px; }
+
+  .toast{ position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(18px); opacity:0;
+    background:rgba(20,20,52,.95); border:1px solid rgba(244,213,137,.4); color:var(--ink);
+    font-size:13px; letter-spacing:1px; padding:11px 18px; border-radius:13px; z-index:30; transition:.25s; pointer-events:none; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="app">
+  <div class="top">
+    <div class="title"><h1>ZODIAC MATCH</h1><div class="sub">Celestial Tiles</div></div>
+    <div class="level">Level<b id="lvl">1</b></div>
+  </div>
+
+  <div class="hud">
+    <div class="stat"><div class="k">Score</div><div class="v gold" id="score">0</div></div>
+    <div class="stat"><div class="k">Best</div><div class="v" id="best">0</div></div>
+    <div class="stat"><div class="k">Tiles Left</div><div class="v" id="left">0</div></div>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+
+  <div class="board" id="board"></div>
+
+  <div class="tray-wrap">
+    <div class="tray-label">Collection Tray · match 3 to clear</div>
+    <div class="tray" id="tray"></div>
+  </div>
+
+  <div class="tools">
+    <button class="tool" id="tUndo" onclick="useUndo()"><span class="ti">↩️</span><span class="tn">Undo</span><span class="ad">AD</span></button>
+    <button class="tool" id="tShuffle" onclick="useShuffle()"><span class="ti">🔀</span><span class="tn">Shuffle</span><span class="ad">AD</span></button>
+    <button class="tool" id="tRemove" onclick="useRemove()"><span class="ti">✨</span><span class="tn">Clear 3</span><span class="ad">AD</span></button>
+    <button class="tool" id="tHint" onclick="useHint()"><span class="ti">🔭</span><span class="tn">Hint</span></button>
+  </div>
+
+  <div class="foot">★ TAP THE STARS · ALIGN YOUR FATE ★</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="em" id="mEm">✨</div>
+    <h2 id="mTitle">Title</h2>
+    <p id="mText">Text</p>
+    <button class="btn" id="mPrimary" onclick="modalPrimary()">Continue</button>
+    <button class="btn ghost" id="mSecondary" onclick="modalSecondary()" style="display:none">Restart</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+
+/* ===== zodiac data (Western, 12 signs) ===== */
+const ZODIAC = [
+  {g:'♈', n:'Aries'},   {g:'♉', n:'Taurus'}, {g:'♊', n:'Gemini'},
+  {g:'♋', n:'Cancer'},  {g:'♌', n:'Leo'},    {g:'♍', n:'Virgo'},
+  {g:'♎', n:'Libra'},   {g:'♏', n:'Scorpio'},{g:'♐', n:'Sagittarius'},
+  {g:'♑', n:'Capricorn'},{g:'♒',n:'Aquarius'},{g:'♓',n:'Pisces'}
+];
+
+/* ===== level configuration ===== */
+function levelCfg(n){
+  const types = Math.min(12, 5 + n);          // distinct zodiac signs in play
+  const triples = 8 + n * 2;                  // number of 3-of-a-kind groups
+  const layers = Math.min(6, 3 + Math.floor(n/2));
+  return { types, tiles: triples * 3, layers };
+}
+
+const TILE = 54, BOARD_W = () => $('board').clientWidth, BOARD_H = 380;
+const TRAY_MAX = 7;
+
+let level = 1, score = 0, best = +(localStorage.getItem('zodiac_best')||0);
+let tiles = [];          // {id,type,x,y,layer,el,state}
+let tray = [];           // {type, ...}
+let history = [];        // for undo: tile ids moved to tray
+let busy = false;
+
+/* ===== starfield ===== */
+const sc = $('stars'), sx = sc.getContext('2d');
+let starList = [];
+function initStars(){
+  sc.width = innerWidth; sc.height = innerHeight;
+  starList = [];
+  const n = Math.floor(innerWidth*innerHeight/9000);
+  for(let i=0;i<n;i++) starList.push({ x:Math.random()*sc.width, y:Math.random()*sc.height,
+    r:Math.random()*1.4+.3, p:Math.random()*Math.PI*2, s:Math.random()*.8+.2 });
+}
+function drawStars(t){
+  sx.clearRect(0,0,sc.width,sc.height);
+  for(const s of starList){
+    const a = .35 + .65*Math.abs(Math.sin(t/1000*s.s + s.p));
+    sx.globalAlpha = a; sx.fillStyle = '#cfe0ff';
+    sx.beginPath(); sx.arc(s.x,s.y,s.r,0,7); sx.fill();
+  }
+  sx.globalAlpha=1; requestAnimationFrame(drawStars);
+}
+
+/* ===== board generation ===== */
+function buildLevel(){
+  const cfg = levelCfg(level);
+  const board = $('board'); board.innerHTML='';
+  tiles=[]; tray=[]; history=[];
+  $('tray').innerHTML='';
+  // pick types and build a multiset with each chosen type count = multiple of 3
+  const pool=[]; let groupsLeft = cfg.tiles/3;
+  const typeIdx=[]; for(let i=0;i<cfg.types;i++) typeIdx.push(i%12);
+  let ti=0;
+  while(groupsLeft>0){ const t = typeIdx[ti%typeIdx.length]; pool.push(t,t,t); groupsLeft--; ti++; }
+  // shuffle pool
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  // place tiles in overlapping layered slots
+  const W = BOARD_W()||440, margin=14;
+  const cols = Math.floor((W-margin*2-TILE)/ (TILE/2)) ;
+  const rows = Math.floor((BOARD_H-margin*2-TILE)/(TILE/2));
+  let id=0;
+  for(let k=0;k<pool.length;k++){
+    const layer = Math.floor(k / Math.ceil(pool.length/cfg.layers)); // spread across layers
+    const cx = margin + Math.floor(Math.random()*cols)*(TILE/2);
+    const cy = margin + Math.floor(Math.random()*rows)*(TILE/2);
+    const jitterX = (Math.random()*2-1)*8, jitterY=(Math.random()*2-1)*8;
+    tiles.push({ id:id++, type:pool[k], x:Math.max(margin,Math.min(W-TILE-margin,cx+jitterX)),
+      y:Math.max(margin,Math.min(BOARD_H-TILE-margin,cy+jitterY)), layer, state:'board', el:null });
+  }
+  renderTiles(); renderTray(); updateFree(); refreshHUD();
+}
+
+function renderTiles(){
+  const board=$('board');
+  for(const t of tiles){
+    if(t.state!=='board'){ if(t.el){ t.el.remove(); t.el=null; } continue; }
+    if(!t.el){
+      const el=document.createElement('div'); el.className='tile';
+      el.innerHTML = '<span class="g">'+ZODIAC[t.type].g+'</span>'+
+        '<span class="corner" style="top:5px;left:5px"></span><span class="corner" style="bottom:5px;right:6px"></span>';
+      el.onclick = ()=>clickTile(t.id);
+      board.appendChild(el); t.el=el;
+    }
+    t.el.style.left=t.x+'px'; t.el.style.top=t.y+'px'; t.el.style.zIndex=10+t.layer;
+  }
+}
+
+/* a board tile is free if no higher tile overlaps it */
+function isFree(t){
+  for(const o of tiles){
+    if(o.state!=='board' || o.id===t.id) continue;
+    const higher = (o.layer>t.layer) || (o.layer===t.layer && o.id>t.id);
+    if(!higher) continue;
+    if(Math.abs(o.x-t.x)<TILE-6 && Math.abs(o.y-t.y)<TILE-6) return false;
+  }
+  return true;
+}
+function updateFree(){
+  for(const t of tiles){ if(t.state!=='board'||!t.el) continue;
+    const free=isFree(t); t.el.classList.toggle('free',free); t.el.classList.toggle('blocked',!free);
+  }
+}
+
+/* ===== tray + matching ===== */
+function clickTile(id){
+  if(busy) return;
+  const t=tiles.find(x=>x.id===id); if(!t||t.state!=='board'||!isFree(t)) return;
+  busy=true; beep(620,.05,.12);
+  t.state='tray'; tray.push({type:t.type}); history.push(id);
+  if(t.el){ t.el.classList.add('pop'); const el=t.el; t.el=null; setTimeout(()=>el.remove(),220); }
+  // group tray by type so triples sit together
+  tray.sort((a,b)=>a.type-b.type);
+  renderTray(); updateFree();
+  setTimeout(()=>{ resolveTray(); busy=false; }, 160);
+}
+function resolveTray(){
+  // find a type with >=3
+  const count={}; tray.forEach(s=>count[s.type]=(count[s.type]||0)+1);
+  let cleared=false;
+  for(const k in count){ if(count[k]>=3){
+    let removed=0; tray=tray.filter(s=>{ if(s.type==+k && removed<3){removed++; return false;} return true; });
+    score += 30 + level*5; cleared=true; beep(880,.08,.16); beep(1180,.08,.12);
+    flashClear(ZODIAC[+k]); break;
+  }}
+  renderTray(); refreshHUD();
+  if(cleared){ if(tiles.every(t=>t.state!=='board') && tray.length===0){ return winLevel(); } resolveTray(); return; }
+  if(tiles.every(t=>t.state!=='board') && tray.length===0) return winLevel();
+  if(tray.length>=TRAY_MAX) gameOver();
+}
+function renderTray(){
+  const tr=$('tray'); tr.innerHTML='';
+  for(let i=0;i<TRAY_MAX;i++){
+    const slot=document.createElement('div'); slot.className='slot';
+    if(tray[i]) slot.innerHTML='<span class="g">'+ZODIAC[tray[i].type].g+'</span>';
+    else if(i>=TRAY_MAX-2 && tray.length>=TRAY_MAX-2) slot.classList.add('warn');
+    tr.appendChild(slot);
+  }
+}
+function flashClear(z){ toast('✦ '+z.n+' aligned  +'+(30+level*5)); }
+
+/* ===== tools (ad nodes) ===== */
+function useUndo(){ if(busy||!history.length) return toast('Nothing to undo');
+  watchAd(()=>{ const id=history.pop(); const t=tiles.find(x=>x.id===id);
+    const idx=tray.map(s=>s.type).lastIndexOf(t.type); if(idx>=0) tray.splice(idx,1);
+    t.state='board'; renderTiles(); tray.sort((a,b)=>a.type-b.type); renderTray(); updateFree(); refreshHUD(); toast('↩️ Tile returned'); });
+}
+function useShuffle(){ if(busy) return; watchAd(()=>{
+  const onBoard=tiles.filter(t=>t.state==='board'); const types=onBoard.map(t=>t.type);
+  for(let i=types.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [types[i],types[j]]=[types[j],types[i]]; }
+  onBoard.forEach((t,i)=>t.type=types[i]); onBoard.forEach(t=>{ if(t.el) t.el.querySelector('.g').textContent=ZODIAC[t.type].g; });
+  updateFree(); toast('🔀 Stars reshuffled'); });
+}
+function useRemove(){ if(busy||!tray.length) return toast('Tray is empty');
+  watchAd(()=>{ const moved=tray.splice(0,3); const ids=[];
+    // return them to board as fresh free tiles on top
+    moved.forEach(m=>{ const t=tiles.find(x=>x.state!=='board'&&x.type===m.type); });
+    // simpler: spawn them back as new top-layer tiles
+    const maxLayer=Math.max(0,...tiles.map(t=>t.layer))+1; const W=BOARD_W()||440;
+    moved.forEach(m=>{ tiles.push({id:tiles.length+Math.random(),type:m.type,
+      x:20+Math.random()*(W-TILE-40), y:20+Math.random()*(BOARD_H-TILE-40), layer:maxLayer, state:'board', el:null}); });
+    renderTiles(); tray.sort((a,b)=>a.type-b.type); renderTray(); updateFree(); refreshHUD(); toast('✨ 3 tiles cleared from tray'); });
+}
+function useHint(){ if(busy) return;
+  // find a free tile whose type already appears in tray, else any pair of free same-type
+  const free=tiles.filter(t=>t.state==='board'&&isFree(t));
+  let pick=free.find(t=>tray.some(s=>s.type===t.type));
+  if(!pick){ const byType={}; free.forEach(t=>{(byType[t.type]=byType[t.type]||[]).push(t);});
+    for(const k in byType) if(byType[k].length>=2){ pick=byType[k][0]; break; } }
+  if(!pick) pick=free[0];
+  if(pick&&pick.el){ pick.el.style.boxShadow='0 0 0 3px #f4d589, 0 0 22px rgba(244,213,137,.9)';
+    setTimeout(()=>{ if(pick.el) pick.el.style.boxShadow=''; },1100); toast('🔭 Try this one'); }
+  else toast('No moves to hint');
+}
+
+/* ===== ad placeholder (real AdSense H5 rewarded wires in here) ===== */
+let adBusy=false;
+function watchAd(reward){ if(adBusy) return; adBusy=true; toast('▶ Ad (placeholder)…');
+  setTimeout(()=>{ adBusy=false; reward(); }, 600);
+}
+
+/* ===== win / lose ===== */
+function winLevel(){
+  busy=true; if(score>best){ best=score; localStorage.setItem('zodiac_best',best); }
+  refreshHUD();
+  showModal('🌟','Level '+level+' Cleared','The constellation is complete. The stars align in your favor.',
+    'Next Level ✦', ()=>{ level++; localStorage.setItem('zodiac_level',level); hideModal(); buildLevel(); busy=false; }, null);
+}
+function gameOver(){
+  busy=true; if(score>best){ best=score; localStorage.setItem('zodiac_best',best); } refreshHUD();
+  showModal('🌑','The Tray is Full','Your collection overflowed. Watch an ad to clear 3 and continue, or restart the level.',
+    'Revive ▶ AD', ()=>{ watchAd(()=>{ tray.splice(0,3); renderTray(); hideModal(); busy=false; }); },
+    'Restart', ()=>{ hideModal(); buildLevel(); busy=false; });
+}
+
+/* ===== modal ===== */
+let _p=null,_s=null;
+function showModal(em,title,text,pLabel,pFn,sLabel,sFn){
+  $('mEm').textContent=em; $('mTitle').textContent=title; $('mText').textContent=text;
+  $('mPrimary').innerHTML=pLabel; _p=pFn;
+  if(sLabel){ $('mSecondary').style.display='block'; $('mSecondary').textContent=sLabel; _s=sFn; }
+  else { $('mSecondary').style.display='none'; _s=null; }
+  $('overlay').classList.add('show');
+}
+function hideModal(){ $('overlay').classList.remove('show'); }
+function modalPrimary(){ if(_p)_p(); }
+function modalSecondary(){ if(_s)_s(); }
+
+/* ===== hud / misc ===== */
+function refreshHUD(){
+  $('lvl').textContent=level; $('score').textContent=score; $('best').textContent=best;
+  const total=tiles.length, left=tiles.filter(t=>t.state==='board').length;
+  $('left').textContent=left;
+  $('bar').style.width = total? Math.round((total-left)/total*100)+'%':'0%';
+  $('tUndo').disabled=!history.length; $('tRemove').disabled=!tray.length;
+}
+function toast(msg){ const el=$('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1500); }
+
+/* ===== sound ===== */
+let actx=null;
+function beep(f,d,v){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended') actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.value=v;
+  o.connect(g); g.connect(actx.destination); const t=actx.currentTime; o.start(t);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d); o.stop(t+d+.02);}catch(_){} }
+
+/* ===== boot ===== */
+function boot(){
+  level=+(localStorage.getItem('zodiac_level')||1);
+  initStars(); requestAnimationFrame(drawStars);
+  buildLevel();
+}
+addEventListener('resize',()=>{ initStars(); });
+boot();
+</script>
+</body>
+</html>
